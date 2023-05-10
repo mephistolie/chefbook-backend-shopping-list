@@ -1,0 +1,16 @@
+syntax = "proto3";
+package v1;
+
+option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
+
+message Purchase {
+  string id = 1;
+  string name = 2;
+  int32 multiplier = 3;
+  bool purchased = 4;
+  int32 amount = 5;
+  string measureUnit = 6;
+  string recipeId = 7;
+  string recipeName = 8;
+}
+

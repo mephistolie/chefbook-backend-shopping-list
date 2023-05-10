@@ -1,5 +1,14 @@
 syntax = "proto3";
 package v1;
 
-option go_package = "github.com/mephistolie/chefbook-backend-service-template/api/proto/v1";
+option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
 
+import "v1/get-shopping-list.proto";
+import "v1/set-shopping-list.proto";
+import "v1/add-to-shopping-list.proto";
+
+service ShoppingListService {
+  rpc GetShoppingList(GetShoppingListRequest) returns (GetShoppingListResponse);
+  rpc SetShoppingList(SetShoppingListRequest) returns (SetShoppingListResponse);
+  rpc AddToShoppingList(AddToShoppingListRequest) returns (AddToShoppingListResponse);
+}

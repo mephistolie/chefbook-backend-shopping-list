@@ -1,0 +1,16 @@
+syntax = "proto3";
+package v1;
+
+option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
+
+import "google/protobuf/timestamp.proto";
+import "v1/purchases.proto";
+
+message GetShoppingListRequest {
+  string userId = 1;
+}
+
+message GetShoppingListResponse {
+  repeated Purchase purchases = 1;
+  google.protobuf.Timestamp timestamp = 2;
+}

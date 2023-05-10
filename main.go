@@ -1,2 +1,0 @@
-package chefbook_backend_api_gateway
-
