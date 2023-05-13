@@ -2,7 +2,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  container: chefbook-backend-shopping-list
+  container: chefbook-backend-shopping-list-service
   registry: ""
   pullPolicy: IfNotPresent
   tag: ""

@@ -6,9 +6,10 @@ import (
 )
 
 type ShoppingList interface {
-	AddUser(userId uuid.UUID) error
-	DeleteUser(userId uuid.UUID) error
+	AddUser(userId uuid.UUID, messageId uuid.UUID) error
+	ImportFirebaseProfile(userId uuid.UUID, shoppingList entity.ShoppingList, messageId uuid.UUID) error
+	DeleteUser(userId uuid.UUID, messageId uuid.UUID) error
 
 	GetShoppingList(userId uuid.UUID) (entity.ShoppingList, error)
-	SetShoppingList(userId uuid.UUID, shoppingList entity.ShoppingList) error
+	SetShoppingList(userId uuid.UUID, shoppingList entity.ShoppingList, lastVersion *int32) error
 }

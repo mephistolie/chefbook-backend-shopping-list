@@ -10,8 +10,7 @@ require (
 	github.com/mephistolie/chefbook-backend-common/firebase v0.6.0
 	github.com/mephistolie/chefbook-backend-common/log v0.6.0
 	github.com/mephistolie/chefbook-backend-common/migrate/sql v0.6.0
-	github.com/mephistolie/chefbook-backend-common/random v0.7.0
-	github.com/mephistolie/chefbook-backend-common/responses v0.6.0
+	github.com/mephistolie/chefbook-backend-common/responses v0.7.0
 	github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0
 	github.com/mephistolie/chefbook-backend-shopping-list/api v1.0.0
 	github.com/peterbourgon/ff/v3 v3.3.0

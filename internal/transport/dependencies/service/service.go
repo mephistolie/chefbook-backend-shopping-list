@@ -18,14 +18,14 @@ type Service struct {
 
 type ShoppingList interface {
 	GetShoppingList(userId uuid.UUID) (entity.ShoppingList, error)
-	SetShoppingList(userId uuid.UUID, purchases []entity.Purchase) error
-	AddToShoppingList(userId uuid.UUID, purchases []entity.Purchase) error
+	SetShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) error
+	AddToShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) error
 }
 
 type Users interface {
-	AddUser(userId uuid.UUID) error
-	ImportFirebaseData(userId uuid.UUID, firebaseId string) error
-	DeleteUser(userId uuid.UUID) error
+	AddUser(userId uuid.UUID, messageId uuid.UUID) error
+	ImportFirebaseData(userId uuid.UUID, firebaseId string, messageId uuid.UUID) error
+	DeleteUser(userId uuid.UUID, messageId uuid.UUID) error
 }
 
 func New(

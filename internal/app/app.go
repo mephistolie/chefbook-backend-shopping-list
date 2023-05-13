@@ -8,9 +8,9 @@ import (
 	shoppinglistpb "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/repository/postgres"
+	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/amqp"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/dependencies/service"
 	shoppingList "github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/grpc"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/mq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -36,9 +36,9 @@ func Run(cfg *config.Config) {
 		return
 	}
 
-	var mqServer *mq.Server = nil
+	var mqServer *amqp.Server = nil
 	if len(*cfg.Amqp.Host) > 0 {
-		mqServer, err = mq.NewServer(cfg.Amqp, repository, shoppingListService.Users)
+		mqServer, err = amqp.NewServer(cfg.Amqp, shoppingListService.Users)
 		if err != nil {
 			return
 		}

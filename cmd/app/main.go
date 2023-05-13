@@ -13,7 +13,7 @@ func main() {
 	cfg := config.Config{
 		Environment: fs.String("environment", "debug", "service environment"),
 		Port:        fs.Int("port", 8080, "service port"),
-		LogsPath:    fs.String("logs-path", "logs/all.log", "logs file path"),
+		LogsPath:    fs.String("logs-path", "", "logs file path"),
 
 		Firebase: config.Firebase{
 			Credentials: fs.String("firebase-credentials", "", "Firebase credentials JSON; leave empty to disable"),

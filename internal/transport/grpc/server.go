@@ -39,8 +39,12 @@ func (s *ShoppingListServer) SetShoppingList(_ context.Context, req *api.SetShop
 		return nil, fail.GrpcInvalidBody
 	}
 	purchases := dto.ParsePurchases(req.Purchases)
+	var lastVersion *int32 = nil
+	if req.LastVersion > 0 {
+		lastVersion = &req.LastVersion
+	}
 
-	if err := s.service.SetShoppingList(userId, purchases); err != nil {
+	if err := s.service.SetShoppingList(userId, purchases, lastVersion); err != nil {
 		return nil, err
 	}
 	return &api.SetShoppingListResponse{Message: "shopping list updated"}, nil
@@ -52,8 +56,12 @@ func (s *ShoppingListServer) AddToShoppingList(_ context.Context, req *api.AddTo
 		return nil, fail.GrpcInvalidBody
 	}
 	purchases := dto.ParsePurchases(req.Purchases)
+	var lastVersion *int32 = nil
+	if req.LastVersion > 0 {
+		lastVersion = &req.LastVersion
+	}
 
-	if err := s.service.AddToShoppingList(userId, purchases); err != nil {
+	if err := s.service.AddToShoppingList(userId, purchases, lastVersion); err != nil {
 		return nil, err
 	}
 	return &api.AddToShoppingListResponse{Message: "purchases added to shopping list"}, nil

@@ -8,8 +8,10 @@ import "v1/purchases.proto";
 message SetShoppingListRequest {
   string userId = 1;
   repeated Purchase purchases = 2;
+  int32 lastVersion = 3;
 }
 
 message SetShoppingListResponse {
   string message = 1;
+  int32 version = 2;
 }

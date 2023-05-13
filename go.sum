@@ -854,12 +854,12 @@ github.com/mephistolie/chefbook-backend-common/log v0.6.0 h1:ucdztSs/6cdnl5zccMu
 github.com/mephistolie/chefbook-backend-common/log v0.6.0/go.mod h1:+X8G15pzJU74a+CF5nsqwszvCWlLoBb2qCuaT0O+690=
 github.com/mephistolie/chefbook-backend-common/migrate/sql v0.6.0 h1:aERwvXh7pV7dKNf0ilG5AB9vqhQuAlzy5kjzf0A7qxw=
 github.com/mephistolie/chefbook-backend-common/migrate/sql v0.6.0/go.mod h1:g9ywS0RLVwDLqOMAB3odt6J/ZVCeqDnd9+5L8tA/kAU=
-github.com/mephistolie/chefbook-backend-common/random v0.7.0 h1:OGVeCejcmIh+wS5tIEmWP3sGWjhiUfiQns/2YxoZIoA=
-github.com/mephistolie/chefbook-backend-common/random v0.7.0/go.mod h1:s7ZWApn73fmLQDTkZfm37qs5nHiuQQ0bWID8NuMrlTg=
-github.com/mephistolie/chefbook-backend-common/responses v0.6.0 h1:faJBEIZFquvDtenbXHAm/yTsb/DKpBqwJ+9h8S9QRXo=
-github.com/mephistolie/chefbook-backend-common/responses v0.6.0/go.mod h1:1G7MuToVsE9jQbUJ6g49jgzbqsLHb4WGesbLHkUHSLE=
+github.com/mephistolie/chefbook-backend-common/responses v0.7.0 h1:omG/LW3fiUOyOtJ0l8ESricoj5a820U7QOx6YAt5krQ=
+github.com/mephistolie/chefbook-backend-common/responses v0.7.0/go.mod h1:1G7MuToVsE9jQbUJ6g49jgzbqsLHb4WGesbLHkUHSLE=
 github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0 h1:pNXz1Z9XPn7iA8QF16MDuFVTEu2uFCksWK68FYWitVo=
 github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0/go.mod h1:wose8RxMtomzIK9cEjBC0FyO02GSna8eswYkYW1dDFE=
+github.com/mephistolie/chefbook-backend-shopping-list/api v1.0.0 h1:Z+4U9RWPLU/Lz3hMULrFdNORyIHhOjJcYmQJCMrm2FQ=
+github.com/mephistolie/chefbook-backend-shopping-list/api v1.0.0/go.mod h1:TH6wl/EpgtLTam96yZ8md5TvRH5KL+a8Ym2SKu91gKI=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/miekg/pkcs11 v1.0.3/go.mod h1:XsNlhZGX73bx86s2hdc/FuaLm2CPZJemRLMA+WTFxgs=
 github.com/mistifyio/go-zfs v2.1.2-0.20190413222219-f784269be439+incompatible/go.mod h1:8AuVvqP/mXw1px98n46wfvcGfQ4ci2FwoAjKYxuo3Z4=
