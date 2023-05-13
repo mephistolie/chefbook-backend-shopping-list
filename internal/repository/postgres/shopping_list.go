@@ -8,38 +8,39 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/internal/entity/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/repository/postgres/dto"
-	"time"
 )
 
 func (r *Repository) GetShoppingList(userId uuid.UUID) (entity.ShoppingList, error) {
-	var shoppingList dto.ShoppingList
-	var shoppingListBSON []byte
+	var shoppingList entity.ShoppingList
+	var bsonPurchases []byte
+	var purchases []dto.Purchase
 
-	getShoppingListQuery := fmt.Sprintf(`
-			SELECT shopping_list
+	query := fmt.Sprintf(`
+			SELECT purchases, version
 			FROM %s
 			WHERE user_id=$1
 		`, shoppingListTable)
 
-	if err := r.db.Get(&shoppingListBSON, getShoppingListQuery, userId); err != nil {
+	row := r.db.QueryRow(query, userId)
+	if err := row.Scan(&bsonPurchases, &shoppingList.Version); err != nil {
 		log.Errorf("unable to get shopping list for user %s: %s", userId, err)
 		return entity.ShoppingList{}, shoppingListFail.GrpcShoppingListNotFound
 	}
 
-	if err := json.Unmarshal(shoppingListBSON, &shoppingList); err != nil {
+	if err := json.Unmarshal(bsonPurchases, &purchases); err != nil {
 		log.Warnf("unable to unmarshal shopping list for user %s: %s", userId, err)
-		emptyShoppingList := emptyShoppingList()
-		_ = r.SetShoppingList(userId, emptyShoppingList, nil)
-		return emptyShoppingList, nil
+		version, err := r.SetShoppingList(userId, []entity.Purchase{}, nil)
+		return entity.ShoppingList{Version: version}, err
 	}
+	shoppingList.Purchases = dto.NewPurchasesEntity(purchases)
 
-	return shoppingList.Entity(), nil
+	return shoppingList, nil
 }
 
-func (r *Repository) SetShoppingList(userId uuid.UUID, shoppingList entity.ShoppingList, lastVersion *int32) error {
-	query, shoppingListBSON, err := getSetShoppingListBaseQuery(shoppingList)
+func (r *Repository) SetShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) (int32, error) {
+	query, shoppingListBSON, err := getSetShoppingListBaseQuery(purchases)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var version int32
@@ -47,27 +48,21 @@ func (r *Repository) SetShoppingList(userId uuid.UUID, shoppingList entity.Shopp
 		query = query + " AND version=$3 RETURNING version"
 		if err = r.db.Get(&version, query, shoppingListBSON, userId, *lastVersion); err != nil {
 			log.Warnf("try to update shopping list with outdated version %s for user %s: %s", *lastVersion, userId, err)
-			return shoppingListFail.GrpcOutdatedVersion
+			return 0, shoppingListFail.GrpcOutdatedVersion
 		}
 	} else {
 		query = query + " RETURNING version"
 		if err = r.db.Get(&version, query, shoppingListBSON, userId); err != nil {
 			log.Errorf("unable to set shopping list for user %s: %s", userId, err)
-			return shoppingListFail.GrpcShoppingListNotFound
+			return 0, shoppingListFail.GrpcShoppingListNotFound
 		}
 	}
 
-	return nil
+	return version, nil
 }
 
-func emptyShoppingList() entity.ShoppingList {
-	return entity.ShoppingList{
-		Timestamp: time.Now(),
-	}
-}
-
-func getSetShoppingListBaseQuery(shoppingList entity.ShoppingList) (string, []byte, error) {
-	shoppingListBSON, err := json.Marshal(dto.NewShoppingList(shoppingList))
+func getSetShoppingListBaseQuery(purchases []entity.Purchase) (string, []byte, error) {
+	shoppingListBSON, err := json.Marshal(dto.NewPurchasesDto(purchases))
 	if err != nil {
 		log.Errorf("unable to marshal shopping list: %s", err)
 		return "", nil, shoppingListFail.GrpcShoppingListNotFound
@@ -75,7 +70,7 @@ func getSetShoppingListBaseQuery(shoppingList entity.ShoppingList) (string, []by
 
 	setShoppingListQuery := fmt.Sprintf(`
 			UPDATE %s
-			SET shopping_list=$1, version=version+1
+			SET purchases=$1, version=version+1
 			WHERE user_id=$2
 		`, shoppingListTable)
 

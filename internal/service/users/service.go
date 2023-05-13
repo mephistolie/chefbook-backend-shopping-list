@@ -7,7 +7,6 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/repository"
-	"time"
 )
 
 type Service struct {
@@ -52,12 +51,7 @@ func (s *Service) ImportFirebaseData(userId uuid.UUID, firebaseId string, messag
 		purchases = append(purchases, purchase)
 	}
 
-	shoppingList := entity.ShoppingList{
-		Purchases: purchases,
-		Timestamp: time.Now(),
-	}
-
-	return s.repo.ImportFirebaseProfile(userId, shoppingList, messageId)
+	return s.repo.ImportFirebaseProfile(userId, purchases, messageId)
 }
 
 func (s *Service) DeleteUser(userId uuid.UUID, messageId uuid.UUID) error {

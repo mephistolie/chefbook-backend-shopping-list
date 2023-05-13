@@ -12,6 +12,5 @@ message SetShoppingListRequest {
 }
 
 message SetShoppingListResponse {
-  string message = 1;
-  int32 version = 2;
+  int32 version = 1;
 }

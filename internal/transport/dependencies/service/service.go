@@ -18,8 +18,8 @@ type Service struct {
 
 type ShoppingList interface {
 	GetShoppingList(userId uuid.UUID) (entity.ShoppingList, error)
-	SetShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) error
-	AddToShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) error
+	SetShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) (int32, error)
+	AddToShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) (int32, error)
 }
 
 type Users interface {

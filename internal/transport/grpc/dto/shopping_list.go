@@ -3,7 +3,6 @@ package dto
 import (
 	api "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppingListResponse {
@@ -16,6 +15,6 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 	}
 	return &api.GetShoppingListResponse{
 		Purchases: purchases,
-		Timestamp: timestamppb.New(shoppingList.Timestamp),
+		Version:   shoppingList.Version,
 	}
 }

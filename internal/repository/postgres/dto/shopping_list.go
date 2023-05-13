@@ -2,34 +2,20 @@ package dto
 
 import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
-	"time"
 )
 
-type ShoppingList struct {
-	Purchases []Purchase `json:"purchases"`
-	Timestamp time.Time  `json:"timestamp"`
-}
-
-func NewShoppingList(shoppingList entity.ShoppingList) ShoppingList {
-	purchases := make([]Purchase, len(shoppingList.Purchases))
-	for i, purchase := range shoppingList.Purchases {
+func NewPurchasesDto(entities []entity.Purchase) []Purchase {
+	purchases := make([]Purchase, len(entities))
+	for i, purchase := range entities {
 		purchases[i] = newPurchase(purchase)
 	}
-
-	return ShoppingList{
-		Purchases: purchases,
-		Timestamp: shoppingList.Timestamp,
-	}
+	return purchases
 }
 
-func (l *ShoppingList) Entity() entity.ShoppingList {
-	purchases := make([]entity.Purchase, len(l.Purchases))
-	for i, purchase := range l.Purchases {
+func NewPurchasesEntity(dto []Purchase) []entity.Purchase {
+	purchases := make([]entity.Purchase, len(dto))
+	for i, purchase := range dto {
 		purchases[i] = purchase.Entity()
 	}
-
-	return entity.ShoppingList{
-		Purchases: purchases,
-		Timestamp: l.Timestamp,
-	}
+	return purchases
 }

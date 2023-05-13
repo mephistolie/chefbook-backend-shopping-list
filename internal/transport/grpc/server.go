@@ -44,10 +44,11 @@ func (s *ShoppingListServer) SetShoppingList(_ context.Context, req *api.SetShop
 		lastVersion = &req.LastVersion
 	}
 
-	if err := s.service.SetShoppingList(userId, purchases, lastVersion); err != nil {
+	version, err := s.service.SetShoppingList(userId, purchases, lastVersion)
+	if err != nil {
 		return nil, err
 	}
-	return &api.SetShoppingListResponse{Message: "shopping list updated"}, nil
+	return &api.SetShoppingListResponse{Version: version}, nil
 }
 
 func (s *ShoppingListServer) AddToShoppingList(_ context.Context, req *api.AddToShoppingListRequest) (*api.AddToShoppingListResponse, error) {
@@ -61,8 +62,9 @@ func (s *ShoppingListServer) AddToShoppingList(_ context.Context, req *api.AddTo
 		lastVersion = &req.LastVersion
 	}
 
-	if err := s.service.AddToShoppingList(userId, purchases, lastVersion); err != nil {
+	version, err := s.service.AddToShoppingList(userId, purchases, lastVersion)
+	if err != nil {
 		return nil, err
 	}
-	return &api.AddToShoppingListResponse{Message: "purchases added to shopping list"}, nil
+	return &api.AddToShoppingListResponse{Version: version}, nil
 }

@@ -22,14 +22,14 @@ func (r *Repository) AddUser(userId uuid.UUID, messageId uuid.UUID) error {
 		}
 	}
 
-	shoppingListBSON, err := json.Marshal(dto.NewShoppingList(emptyShoppingList()))
+	shoppingListBSON, err := json.Marshal([]dto.Purchase{})
 	if err != nil {
 		log.Errorf("unable to get marshal shopping list for user %s: %s", userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 
 	addUserQuery := fmt.Sprintf(`
-			INSERT INTO %s (user_id, shopping_list)
+			INSERT INTO %s (user_id, purchases)
 			VALUES ($1, $2)
 		`, shoppingListTable)
 
@@ -41,7 +41,7 @@ func (r *Repository) AddUser(userId uuid.UUID, messageId uuid.UUID) error {
 	return commitTransaction(tx)
 }
 
-func (r *Repository) ImportFirebaseProfile(userId uuid.UUID, shoppingList entity.ShoppingList, messageId uuid.UUID) error {
+func (r *Repository) ImportFirebaseProfile(userId uuid.UUID, purchases []entity.Purchase, messageId uuid.UUID) error {
 	tx, err := r.handleMessageIdempotently(messageId)
 	if err != nil {
 		if isUniqueViolationError(err) {
@@ -51,7 +51,7 @@ func (r *Repository) ImportFirebaseProfile(userId uuid.UUID, shoppingList entity
 		}
 	}
 
-	setShoppingListQuery, shoppingListBSON, err := getSetShoppingListBaseQuery(shoppingList)
+	setShoppingListQuery, shoppingListBSON, err := getSetShoppingListBaseQuery(purchases)
 	if err != nil {
 		return errorWithTransactionRollback(tx, err)
 	}

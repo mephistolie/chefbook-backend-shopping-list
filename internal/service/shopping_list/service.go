@@ -5,7 +5,6 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/firebase"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/repository"
-	"time"
 )
 
 type Service struct {
@@ -23,18 +22,14 @@ func (s *Service) GetShoppingList(userId uuid.UUID) (entity.ShoppingList, error)
 	return s.repo.GetShoppingList(userId)
 }
 
-func (s *Service) SetShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) error {
-	shoppingList := entity.ShoppingList{
-		Purchases: purchases,
-		Timestamp: time.Now().UTC(),
-	}
-	return s.repo.SetShoppingList(userId, shoppingList, lastVersion)
+func (s *Service) SetShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) (int32, error) {
+	return s.repo.SetShoppingList(userId, purchases, lastVersion)
 }
 
-func (s *Service) AddToShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) error {
+func (s *Service) AddToShoppingList(userId uuid.UUID, purchases []entity.Purchase, lastVersion *int32) (int32, error) {
 	shoppingList, err := s.repo.GetShoppingList(userId)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	purchasesByIds := make(map[uuid.UUID]*entity.Purchase)
@@ -62,7 +57,6 @@ func (s *Service) AddToShoppingList(userId uuid.UUID, purchases []entity.Purchas
 			shoppingList.Purchases = append(shoppingList.Purchases, purchases[i])
 		}
 	}
-	shoppingList.Timestamp = time.Now().UTC()
 
-	return s.repo.SetShoppingList(userId, shoppingList, lastVersion)
+	return s.repo.SetShoppingList(userId, purchases, lastVersion)
 }
