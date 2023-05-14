@@ -3,8 +3,8 @@ package dto
 import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	api "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
+	api "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 )
 
 func BindSetShoppingListRequest(req *api.SetShoppingListRequest) (entity.ShoppingListInput, error) {

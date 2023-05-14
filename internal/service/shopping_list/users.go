@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	api "github.com/mephistolie/chefbook-backend-auth/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 )
 
 func (s *Service) GetShoppingListInvites(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {

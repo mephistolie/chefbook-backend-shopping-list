@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	api "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/dependencies/service"
+	api "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/dependencies/service"
 )
 
 type ShoppingListServer struct {

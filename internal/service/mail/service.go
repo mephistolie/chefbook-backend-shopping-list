@@ -3,8 +3,8 @@ package mail
 import (
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/mail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/assets"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/assets"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 	"time"
 )
 

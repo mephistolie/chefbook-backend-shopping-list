@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/mephistolie/chefbook-backend-common/log"
-	shoppinglistpb "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
+	shoppinglistpb "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"time"

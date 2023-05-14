@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 )
 
 const (

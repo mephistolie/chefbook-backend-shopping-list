@@ -1,6 +1,6 @@
 package services
 
-import "github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
+import "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 
 type Remote struct {
 	Auth *Auth

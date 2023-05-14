@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	auth "github.com/mephistolie/chefbook-backend-auth/api/mq"
 	"github.com/mephistolie/chefbook-backend-common/log"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/dependencies/service"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/dependencies/service"
 	amqp "github.com/wagslane/go-rabbitmq"
 	"k8s.io/utils/strings/slices"
 )

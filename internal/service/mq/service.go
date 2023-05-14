@@ -5,8 +5,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/firebase"
 	"github.com/mephistolie/chefbook-backend-common/log"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/repository"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/repository"
 )
 
 type Service struct {

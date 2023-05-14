@@ -5,8 +5,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
 	"github.com/mephistolie/chefbook-backend-common/subscription"
-	api "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/grpc/dto"
+	api "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/grpc/dto"
 )
 
 func (s *ShoppingListServer) GetShoppingLists(_ context.Context, req *api.GetShoppingListsRequest) (*api.GetShoppingListsResponse, error) {

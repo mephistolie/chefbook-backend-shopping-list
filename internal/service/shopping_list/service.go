@@ -1,9 +1,9 @@
 package shopping_list
 
 import (
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/repository"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/services"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/mail"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/repository"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/services"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mail"
 )
 
 type Service struct {

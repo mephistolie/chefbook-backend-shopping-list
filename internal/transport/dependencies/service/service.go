@@ -4,13 +4,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/firebase"
 	"github.com/mephistolie/chefbook-backend-common/log"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/repository"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/services"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/mail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/mq"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/shopping_list"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/repository"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/services"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mail"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mq"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/shopping_list"
 )
 
 type Service struct {

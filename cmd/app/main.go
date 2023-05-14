@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/app"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/app"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 	"github.com/peterbourgon/ff/v3"
 	"os"
 )

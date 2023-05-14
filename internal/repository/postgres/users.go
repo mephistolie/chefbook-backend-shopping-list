@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/internal/entity/fail"
+	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 )
 
 func (r *Repository) GetShoppingListOwner(shoppingListId uuid.UUID) (uuid.UUID, error) {

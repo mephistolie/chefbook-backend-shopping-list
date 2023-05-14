@@ -7,9 +7,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
-	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/internal/entity/fail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/repository/postgres/dto"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres/dto"
 )
 
 func (r *Repository) GetShoppingLists(userId uuid.UUID, onlyPending bool) ([]entity.ShoppingListInfo, error) {

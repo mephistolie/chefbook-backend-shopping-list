@@ -2,8 +2,8 @@ package shopping_list
 
 import (
 	"github.com/google/uuid"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
-	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/internal/entity/fail"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 )
 
 func (s *Service) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {

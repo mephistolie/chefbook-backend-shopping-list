@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/google/uuid"
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 )
 
 type ShoppingList interface {

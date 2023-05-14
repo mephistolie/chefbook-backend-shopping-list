@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 )
 
 func NewPurchasesDto(entities []entity.Purchase) []Purchase {
