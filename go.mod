@@ -1,4 +1,4 @@
-module github.com/mephistolie/chefbook-backend-shopping-list
+module github.com/mephistolie/chefbook-backend-shopping-list/v2
 
 go 1.20
 
