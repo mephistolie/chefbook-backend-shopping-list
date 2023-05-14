@@ -11,6 +11,5 @@ message Purchase {
   int32 amount = 5;
   string measureUnit = 6;
   string recipeId = 7;
-  string recipeName = 8;
 }
 

@@ -6,17 +6,20 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/entity"
 )
 
-func ParsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
+func parsePurchases(rawPurchases []*api.Purchase) ([]entity.Purchase, []uuid.UUID) {
 	var purchases []entity.Purchase
+	var recipeIds []uuid.UUID
+
 	for _, rawPurchase := range rawPurchases {
 		id, err := uuid.Parse(rawPurchase.Id)
 		if err != nil {
 			continue
 		}
 
-		multiplier := 1
-		if rawPurchase.Multiplier > 1 {
-			multiplier = int(rawPurchase.Multiplier)
+		var multiplierPtr *int = nil
+		if rawPurchase.Multiplier > 0 {
+			multiplier := int(rawPurchase.Multiplier)
+			multiplierPtr = &multiplier
 		}
 
 		var amountPtr *int = nil
@@ -32,28 +35,23 @@ func ParsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
 		}
 
 		var recipeIdPtr *uuid.UUID = nil
-		var recipeNamePtr *string = nil
 		if recipeId, err := uuid.Parse(rawPurchase.RecipeId); err == nil {
 			recipeIdPtr = &recipeId
-			if len(rawPurchase.RecipeName) > 0 {
-				recipeName := rawPurchase.RecipeName
-				recipeNamePtr = &recipeName
-			}
+			recipeIds = append(recipeIds, recipeId)
 		}
 
 		purchase := entity.Purchase{
 			Id:          id,
 			Name:        rawPurchase.Name,
-			Multiplier:  multiplier,
+			Multiplier:  multiplierPtr,
 			Purchased:   rawPurchase.Purchased,
 			Amount:      amountPtr,
 			MeasureUnit: measureUnitPtr,
 			RecipeId:    recipeIdPtr,
-			RecipeName:  recipeNamePtr,
 		}
 
 		purchases = append(purchases, purchase)
 	}
 
-	return purchases
+	return purchases, recipeIds
 }

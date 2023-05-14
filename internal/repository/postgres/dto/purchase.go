@@ -8,12 +8,11 @@ import (
 type Purchase struct {
 	Id          uuid.UUID  `json:"purchaseId" binding:"required"`
 	Name        string     `json:"name" binding:"required"`
-	Multiplier  int        `json:"multiplier,omitempty"`
+	Multiplier  *int       `json:"multiplier,omitempty"`
 	Purchased   bool       `json:"purchased"`
 	Amount      *int       `json:"amount,omitempty"`
 	MeasureUnit *string    `json:"measureUnit,omitempty"`
 	RecipeId    *uuid.UUID `json:"recipeId,omitempty"`
-	RecipeName  *string    `json:"recipeName,omitempty"`
 }
 
 func newPurchase(purchase entity.Purchase) Purchase {
@@ -25,7 +24,6 @@ func newPurchase(purchase entity.Purchase) Purchase {
 		Amount:      purchase.Amount,
 		MeasureUnit: purchase.MeasureUnit,
 		RecipeId:    purchase.RecipeId,
-		RecipeName:  purchase.RecipeName,
 	}
 }
 
@@ -38,6 +36,5 @@ func (l *Purchase) Entity() entity.Purchase {
 		Amount:      l.Amount,
 		MeasureUnit: l.MeasureUnit,
 		RecipeId:    l.RecipeId,
-		RecipeName:  l.RecipeName,
 	}
 }

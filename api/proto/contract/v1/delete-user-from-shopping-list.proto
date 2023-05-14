@@ -1,0 +1,14 @@
+syntax = "proto3";
+package v1;
+
+option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
+
+message DeleteUserFromShoppingListRequest {
+  string requesterId = 1;
+  string shoppingListId = 2;
+  string userId = 3;
+}
+
+message DeleteUserFromShoppingListResponse {
+  string message = 1;
+}

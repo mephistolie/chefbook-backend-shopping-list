@@ -15,6 +15,12 @@ func main() {
 		Port:        fs.Int("port", 8080, "service port"),
 		LogsPath:    fs.String("logs-path", "", "logs file path"),
 
+		ShoppingList: config.ShoppingList{
+			MaxShoppingListsCount:     fs.Int("max-shopping-lists", 5, "max shopping lists per user count"),
+			MaxShoppingListUsersCount: fs.Int("max-shopping-list-users", 6, "max shopping list users count"),
+			CheckSubscription:         fs.Bool("check-subscription", true, "enable free subscription limits"),
+		},
+
 		Firebase: config.Firebase{
 			Credentials: fs.String("firebase-credentials", "", "Firebase credentials JSON; leave empty to disable"),
 		},
@@ -33,6 +39,18 @@ func main() {
 			User:     fs.String("amqp-user", "guest", "message broker user name"),
 			Password: fs.String("amqp-password", "guest", "message broker user password"),
 			VHost:    fs.String("amqp-vhost", "", "message broker virtual host"),
+		},
+
+		Smtp: config.Smtp{
+			Host:         fs.String("smtp-host", "", "SMTP host; leave empty to disable"),
+			Port:         fs.Int("smtp-port", 465, "SMTP port"),
+			Email:        fs.String("smtp-email", "", "SMTP sender email"),
+			Password:     fs.String("smtp-password", "", "SMTP sender password"),
+			SendAttempts: fs.Int("smtp-attempts", 3, "SMTP email sending attempts"),
+		},
+
+		AuthService: config.AuthService{
+			Addr: fs.String("auth-addr", "", "auth service address"),
 		},
 	}
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVars()); err != nil {

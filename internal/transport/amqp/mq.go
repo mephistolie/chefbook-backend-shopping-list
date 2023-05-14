@@ -23,10 +23,10 @@ var supportedMsgTypes = []string{
 type Server struct {
 	conn             *amqp.Conn
 	consumerProfiles *amqp.Consumer
-	service          service.Users
+	service          service.MQ
 }
 
-func NewServer(cfg config.Amqp, service service.Users) (*Server, error) {
+func NewServer(cfg config.Amqp, service service.MQ) (*Server, error) {
 	url := fmt.Sprintf("amqp://%s:%s@%s:%d/%s", *cfg.User, *cfg.Password, *cfg.Host, *cfg.Port, *cfg.VHost)
 	conn, err := amqp.NewConn(url)
 	if err != nil {
@@ -78,6 +78,7 @@ func (s *Server) handleDelivery(delivery amqp.Delivery) amqp.Action {
 		Body: delivery.Body,
 	}
 	if err = s.handleMessage(msg); err != nil {
+		log.Warn("requeue message ", msg.Id)
 		return amqp.NackRequeue
 	}
 

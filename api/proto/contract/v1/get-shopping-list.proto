@@ -7,9 +7,13 @@ import "v1/purchases.proto";
 
 message GetShoppingListRequest {
   string userId = 1;
+  string shoppingListId = 2;
 }
 
 message GetShoppingListResponse {
-  repeated Purchase purchases = 1;
-  int32 version = 2;
+  string name = 1;
+  string type = 2;
+  repeated Purchase purchases = 3;
+  map<string, string> recipeNames = 4;
+  int32 version = 5;
 }

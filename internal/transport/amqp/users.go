@@ -19,7 +19,7 @@ func (s *Server) handleProfileCreatedMsg(messageId uuid.UUID, data []byte) error
 		return err
 	}
 
-	return s.service.AddUser(userId, messageId)
+	return s.service.CreatePersonalShoppingList(userId, messageId)
 }
 
 func (s *Server) handleFirebaseImportMsg(messageId uuid.UUID, data []byte) error {
@@ -34,7 +34,7 @@ func (s *Server) handleFirebaseImportMsg(messageId uuid.UUID, data []byte) error
 	}
 
 	log.Infof("import firebase profile %s for user %s...", body.FirebaseId, body.UserId)
-	return s.service.ImportFirebaseData(userId, body.FirebaseId, messageId)
+	return s.service.ImportFirebaseShoppingList(userId, body.FirebaseId, messageId)
 }
 
 func (s *Server) handleProfileDeletedMsg(messageId uuid.UUID, data []byte) error {
@@ -49,5 +49,5 @@ func (s *Server) handleProfileDeletedMsg(messageId uuid.UUID, data []byte) error
 	}
 
 	log.Infof("deleting user %s...", body.UserId)
-	return s.service.DeleteUser(userId, messageId)
+	return s.service.DeletePersonalShoppingList(userId, messageId)
 }

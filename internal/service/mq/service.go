@@ -1,4 +1,4 @@
-package users
+package mq
 
 import (
 	"errors"
@@ -14,10 +14,6 @@ type Service struct {
 	firebase *firebase.Client
 }
 
-func (s *Service) AddUser(userId uuid.UUID, messageId uuid.UUID) error {
-	return s.repo.AddUser(userId, messageId)
-}
-
 func NewService(
 	repo repository.ShoppingList,
 	firebase *firebase.Client,
@@ -28,7 +24,11 @@ func NewService(
 	}
 }
 
-func (s *Service) ImportFirebaseData(userId uuid.UUID, firebaseId string, messageId uuid.UUID) error {
+func (s *Service) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
+	return s.repo.CreatePersonalShoppingList(userId, messageId)
+}
+
+func (s *Service) ImportFirebaseShoppingList(userId uuid.UUID, firebaseId string, messageId uuid.UUID) error {
 	if s.firebase == nil {
 		log.Warnf("try to import firebase profile with firebase import disabled")
 		return errors.New("firebase import disabled")
@@ -44,16 +44,19 @@ func (s *Service) ImportFirebaseData(userId uuid.UUID, firebaseId string, messag
 	var purchases []entity.Purchase
 	for _, firebasePurchase := range *firebasePurchases {
 		purchase := entity.Purchase{
-			Id:         uuid.New(),
-			Name:       firebasePurchase,
-			Multiplier: 1,
+			Id:   uuid.New(),
+			Name: firebasePurchase,
 		}
 		purchases = append(purchases, purchase)
 	}
 
-	return s.repo.ImportFirebaseProfile(userId, purchases, messageId)
+	shoppingListId, err := s.repo.GetPersonalShoppingListId(userId)
+	if err != nil {
+		return err
+	}
+	return s.repo.ImportFirebaseShoppingList(shoppingListId, purchases, messageId)
 }
 
-func (s *Service) DeleteUser(userId uuid.UUID, messageId uuid.UUID) error {
-	return s.repo.DeleteUser(userId, messageId)
+func (s *Service) DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
+	return s.repo.DeletePersonalShoppingList(userId, messageId)
 }

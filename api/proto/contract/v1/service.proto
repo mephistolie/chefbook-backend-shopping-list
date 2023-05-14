@@ -3,12 +3,33 @@ package v1;
 
 option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
 
+import "v1/get-shopping-lists.proto";
+import "v1/create-shared-shopping-list.proto";
 import "v1/get-shopping-list.proto";
+import "v1/set-shopping-list-name.proto";
 import "v1/set-shopping-list.proto";
-import "v1/add-to-shopping-list.proto";
+import "v1/delete-shared-shopping-list.proto";
+import "v1/get-shopping-list-invites.proto";
+import "v1/get-shopping-list-users.proto";
+import "v1/invite-user-to-shopping-list.proto";
+import "v1/accept-shopping-list-invite.proto";
+import "v1/decline-shopping-list-invite.proto";
+import "v1/delete-user-from-shopping-list.proto";
 
 service ShoppingListService {
+  rpc GetShoppingLists(GetShoppingListsRequest) returns (GetShoppingListsResponse);
+
+  rpc CreateSharedShoppingList(CreateSharedShoppingListRequest) returns (CreateSharedShoppingListResponse);
   rpc GetShoppingList(GetShoppingListRequest) returns (GetShoppingListResponse);
+  rpc SetShoppingListName(SetShoppingListNameRequest) returns (SetShoppingListNameResponse);
   rpc SetShoppingList(SetShoppingListRequest) returns (SetShoppingListResponse);
-  rpc AddToShoppingList(AddToShoppingListRequest) returns (AddToShoppingListResponse);
+  rpc AddPurchasesToShoppingList(SetShoppingListRequest) returns (SetShoppingListResponse);
+  rpc DeleteSharedShoppingList(DeleteSharedShoppingListRequest) returns (DeleteSharedShoppingListResponse);
+
+  rpc GetShoppingListInvites(GetShoppingListInvitesRequest) returns (GetShoppingListInvitesResponse);
+  rpc GetShoppingListUsers(GetShoppingListUsersRequest) returns (GetShoppingListUsersResponse);
+  rpc InviteUserToShoppingList(InviteUserToShoppingListRequest) returns (InviteUserToShoppingListResponse);
+  rpc AcceptShoppingListInvite(AcceptShoppingListInviteRequest) returns (AcceptShoppingListInviteResponse);
+  rpc DeclineShoppingListInvite(DeclineShoppingListInviteRequest) returns (DeclineShoppingListInviteResponse);
+  rpc DeleteUserFromShoppingList(DeleteUserFromShoppingListRequest) returns (DeleteUserFromShoppingListResponse);
 }

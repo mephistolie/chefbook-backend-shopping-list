@@ -8,6 +8,7 @@ import (
 	shoppinglistpb "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/config"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/repository/postgres"
+	"github.com/mephistolie/chefbook-backend-shopping-list/internal/service/dependencies/services"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/amqp"
 	"github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/dependencies/service"
 	shoppingList "github.com/mephistolie/chefbook-backend-shopping-list/internal/transport/grpc"
@@ -19,7 +20,7 @@ import (
 )
 
 func Run(cfg *config.Config) {
-	log.Init(*cfg.LogsPath, *cfg.Environment == config.EnvDevelop)
+	log.Init(*cfg.LogsPath, *cfg.Environment == config.EnvDev)
 	cfg.Print()
 
 	db, err := postgres.Connect(cfg.Database)
@@ -28,9 +29,15 @@ func Run(cfg *config.Config) {
 		return
 	}
 
-	repository := postgres.NewRepository(db)
+	repository := postgres.NewRepository(db, cfg.ShoppingList)
 
-	shoppingListService, err := service.New(cfg, repository)
+	remoteServices, err := services.NewRemote(cfg)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	shoppingListService, err := service.New(cfg, repository, remoteServices)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -38,7 +45,7 @@ func Run(cfg *config.Config) {
 
 	var mqServer *amqp.Server = nil
 	if len(*cfg.Amqp.Host) > 0 {
-		mqServer, err = amqp.NewServer(cfg.Amqp, shoppingListService.Users)
+		mqServer, err = amqp.NewServer(cfg.Amqp, shoppingListService.MQ)
 		if err != nil {
 			return
 		}
@@ -62,7 +69,7 @@ func Run(cfg *config.Config) {
 	)
 
 	healthServer := health.NewServer()
-	shoppingListServer := shoppingList.NewServer(*shoppingListService)
+	shoppingListServer := shoppingList.NewServer(*shoppingListService, *cfg.ShoppingList.CheckSubscription)
 
 	go monitorHealthChecking(db, healthServer)
 
@@ -90,6 +97,9 @@ func Run(cfg *config.Config) {
 				return nil
 			}
 			return mqServer.Stop()
+		},
+		"services": func(ctx context.Context) error {
+			return remoteServices.Stop()
 		},
 	})
 	<-wait

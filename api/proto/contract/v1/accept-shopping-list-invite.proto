@@ -1,0 +1,13 @@
+syntax = "proto3";
+package v1;
+
+option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
+
+message AcceptShoppingListInviteRequest {
+  string userId = 1;
+  string shoppingListId = 2;
+}
+
+message AcceptShoppingListInviteResponse {
+  string message = 1;
+}

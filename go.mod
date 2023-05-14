@@ -9,14 +9,16 @@ require (
 	github.com/mephistolie/chefbook-backend-auth/api v1.3.1
 	github.com/mephistolie/chefbook-backend-common/firebase v0.6.0
 	github.com/mephistolie/chefbook-backend-common/log v0.6.0
+	github.com/mephistolie/chefbook-backend-common/mail v0.6.0
 	github.com/mephistolie/chefbook-backend-common/migrate/sql v0.6.0
-	github.com/mephistolie/chefbook-backend-common/responses v0.7.0
+	github.com/mephistolie/chefbook-backend-common/responses v0.8.0
 	github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0
+	github.com/mephistolie/chefbook-backend-common/subscription v0.8.0
 	github.com/mephistolie/chefbook-backend-shopping-list/api v1.0.0
+	github.com/mssola/useragent v1.0.0
 	github.com/peterbourgon/ff/v3 v3.3.0
 	github.com/wagslane/go-rabbitmq v0.12.3
 	google.golang.org/grpc v1.54.0
-	google.golang.org/protobuf v1.30.0
 	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b
 )
 
@@ -30,6 +32,7 @@ require (
 	cloud.google.com/go/storage v1.30.1 // indirect
 	firebase.google.com/go/v4 v4.11.0 // indirect
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
+	github.com/go-gomail/gomail v0.0.0-20160411212932-81ebce5c23df // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.15.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -67,4 +70,6 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/appengine/v2 v2.0.2 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )

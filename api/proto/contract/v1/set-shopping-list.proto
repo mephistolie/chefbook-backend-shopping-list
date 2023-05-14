@@ -6,9 +6,11 @@ option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/p
 import "v1/purchases.proto";
 
 message SetShoppingListRequest {
-  string userId = 1;
-  repeated Purchase purchases = 2;
-  int32 lastVersion = 3;
+  string editorId = 1;
+  string shoppingListId = 2;
+  repeated Purchase purchases = 3;
+  map<string, string> recipeNames = 4;
+  int32 lastVersion = 5;
 }
 
 message SetShoppingListResponse {

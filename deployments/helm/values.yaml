@@ -13,6 +13,10 @@ config:
   # Leave empty for stdout only
   logsPath: ""
 
+  maxShoppingLists: 5
+  maxShoppingListUsers: 6
+  checkSubscription: true
+
   postgres:
     host: ""
     port: 5432
@@ -23,6 +27,12 @@ config:
     namespace: ""
     port: 5672
     vhost: ""
+
+  smtp:
+    host: smtp.gmail.com
+    port: 465
+    email: ""
+    sendAttempts: 3
 
 secrets:
   firebase:
@@ -36,6 +46,15 @@ secrets:
     name: rabbitmq-secrets
     userRef: user
     passwordRef: password
+  smtp:
+    name: smtp-secrets
+    passwordRef: password
+
+services:
+  auth:
+    name: chefbook-backend-auth-service
+    namespace: ""
+    port: 8080
 
 service:
   type: ClusterIP

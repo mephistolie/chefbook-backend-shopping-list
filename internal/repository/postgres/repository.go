@@ -13,14 +13,17 @@ import (
 )
 
 const (
-	shoppingListTable = "shopping_list"
-	inboxTable        = "inbox"
+	shoppingListsTable = "shopping_lists"
+	usersTable         = "shopping_lists_users"
+	inboxTable         = "inbox"
 
 	errUniqueViolation = "23505"
 )
 
 type Repository struct {
-	db *sqlx.DB
+	db                        *sqlx.DB
+	maxShoppingListsCount     int
+	maxShoppingListUsersCount int
 }
 
 func Connect(cfg config.Database) (*sqlx.DB, error) {
@@ -34,8 +37,21 @@ func Connect(cfg config.Database) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{db: db}
+func NewRepository(db *sqlx.DB, cfg config.ShoppingList) *Repository {
+	return &Repository{
+		db:                        db,
+		maxShoppingListsCount:     *cfg.MaxShoppingListUsersCount,
+		maxShoppingListUsersCount: *cfg.MaxShoppingListUsersCount,
+	}
+}
+
+func (r *Repository) startTransaction() (*sql.Tx, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		log.Error("unable to begin transaction: ", err)
+		return nil, fail.GrpcUnknown
+	}
+	return tx, nil
 }
 
 func errorWithTransactionRollback(tx *sql.Tx, err error) error {
