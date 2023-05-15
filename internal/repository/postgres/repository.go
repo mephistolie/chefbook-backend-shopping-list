@@ -10,6 +10,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
+	"time"
 )
 
 const (
@@ -24,6 +25,7 @@ const (
 type Repository struct {
 	db                    *sqlx.DB
 	maxShoppingListsCount int
+	keyTtl                time.Duration
 }
 
 func Connect(cfg config.Database) (*sqlx.DB, error) {
@@ -41,6 +43,7 @@ func NewRepository(db *sqlx.DB, cfg config.ShoppingList) *Repository {
 	return &Repository{
 		db:                    db,
 		maxShoppingListsCount: *cfg.MaxShoppingListsCount,
+		keyTtl:                *cfg.KeyTtl,
 	}
 }
 

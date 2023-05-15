@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	"time"
 )
 
 type ShoppingList interface {
@@ -20,7 +21,7 @@ type ShoppingList interface {
 	DeleteSharedShoppingList(shoppingListId uuid.UUID) error
 
 	GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID, error)
-	GenerateShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, error)
+	GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, time.Time, error)
 	IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool, error)
 	AddUserToShoppingList(userId, shoppingListId uuid.UUID) error
 	DeleteUserFromShoppingList(userId, shoppingListId uuid.UUID) error

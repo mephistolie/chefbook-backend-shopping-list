@@ -7,6 +7,7 @@ import (
 	api "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/grpc/dto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.GetShoppingListUsersRequest) (*api.GetShoppingListUsersResponse, error) {
@@ -27,7 +28,7 @@ func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.Ge
 	return &api.GetShoppingListUsersResponse{Users: dto.NewInvitesResponse(invites)}, nil
 }
 
-func (s *ShoppingListServer) GenerateShoppingListLink(_ context.Context, req *api.GenerateShoppingListLinkRequest) (*api.GenerateShoppingListLinkResponse, error) {
+func (s *ShoppingListServer) GetShoppingListLink(_ context.Context, req *api.GetShoppingListLinkRequest) (*api.GetShoppingListLinkResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -37,12 +38,12 @@ func (s *ShoppingListServer) GenerateShoppingListLink(_ context.Context, req *ap
 		return nil, fail.GrpcInvalidBody
 	}
 
-	link, err := s.service.GenerateShoppingListLink(shoppingListId, requesterId, req.LinkPattern)
+	link, expiresAt, err := s.service.GetShoppingListLink(shoppingListId, requesterId, req.LinkPattern)
 	if err != nil {
 		return nil, err
 	}
 
-	return &api.GenerateShoppingListLinkResponse{Link: link}, nil
+	return &api.GetShoppingListLinkResponse{Link: link, ExpiresAt: timestamppb.New(expiresAt)}, nil
 }
 
 func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinShoppingListRequest) (*api.JoinShoppingListResponse, error) {

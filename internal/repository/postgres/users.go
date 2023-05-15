@@ -54,10 +54,10 @@ func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID
 	return users, nil
 }
 
-func (r *Repository) GenerateShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, error) {
+func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
 	tx, err := r.startTransaction()
 	if err != nil {
-		return uuid.UUID{}, err
+		return uuid.UUID{}, time.Time{}, err
 	}
 
 	var key uuid.UUID
@@ -75,20 +75,21 @@ func (r *Repository) GenerateShoppingListKey(shoppingListId uuid.UUID) (uuid.UUI
 			RETURNING key, expires_at
 		`, keysTable)
 
-	row := tx.QueryRow(createKeyQuery, shoppingListId, time.Now().Add(24*time.Hour))
+	row := tx.QueryRow(createKeyQuery, shoppingListId, time.Now().Add(r.keyTtl))
 	if err := row.Scan(&key, &expiresAt); err != nil {
 		log.Errorf("unable to create shopping list %s key", shoppingListId, err)
-		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
+		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 	if expiresAt.Unix() < time.Now().Unix() {
 		return r.updateShoppingListKey(tx, shoppingListId)
 	}
 
-	return key, commitTransaction(tx)
+	return key, expiresAt, commitTransaction(tx)
 }
 
-func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID) (uuid.UUID, error) {
+func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
 	key := uuid.New()
+	expiresAt := time.Now().Add(r.keyTtl)
 
 	updateKeyQuery := fmt.Sprintf(`
 			UPDATE %s
@@ -96,12 +97,12 @@ func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID)
 			WHERE shopping_list_id=$3
 		`, keysTable)
 
-	if _, err := tx.Exec(updateKeyQuery, key, time.Now().Add(24*time.Hour), shoppingListId); err != nil {
+	if _, err := tx.Exec(updateKeyQuery, key, expiresAt, shoppingListId); err != nil {
 		log.Errorf("unable to update shopping list %s key", shoppingListId, err)
-		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
+		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 
-	return key, commitTransaction(tx)
+	return key, expiresAt, commitTransaction(tx)
 }
 
 func (r *Repository) IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool, error) {

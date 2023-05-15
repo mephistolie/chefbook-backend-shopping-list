@@ -6,6 +6,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 	"github.com/peterbourgon/ff/v3"
 	"os"
+	"time"
 )
 
 func main() {
@@ -17,6 +18,7 @@ func main() {
 
 		ShoppingList: config.ShoppingList{
 			MaxShoppingListsCount: fs.Int("max-shopping-lists", 5, "max shopping lists per owner count"),
+			KeyTtl:                fs.Duration("shopping-list-key-ttl", 24*time.Hour, "shopping list key time to life"),
 			CheckSubscription:     fs.Bool("check-subscription", true, "enable free subscription limits"),
 		},
 

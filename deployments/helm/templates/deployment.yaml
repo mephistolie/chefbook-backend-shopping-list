@@ -44,10 +44,8 @@ spec:
 
             - name: MAX_SHOPPING_LISTS
               value: {{ .Values.config.maxShoppingLists | quote }}
-            - name: MAX_SHOPPING_LIST_USERS
-              value: {{ .Values.config.maxShoppingListUsers | quote }}
-            - name: CHECK_SUBSCRIPTION
-              value: {{ .Values.config.checkSubscription | quote }}
+            - name: SHOPPING_LIST_KEY_TTL
+              value: {{ .Values.config.shoppingListKeyTtl | quote }}
 
             # Firebase
 

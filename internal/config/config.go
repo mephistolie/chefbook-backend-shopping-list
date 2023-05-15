@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/mephistolie/chefbook-backend-common/log"
+	"time"
 )
 
 const (
@@ -25,6 +26,7 @@ type Config struct {
 
 type ShoppingList struct {
 	MaxShoppingListsCount *int
+	KeyTtl                *time.Duration
 	CheckSubscription     *bool
 }
 

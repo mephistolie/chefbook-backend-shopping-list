@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
+	"time"
 )
 
 func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]uuid.UUID, error) {
@@ -14,15 +15,15 @@ func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([
 	return s.repo.GetShoppingListUsers(shoppingListId)
 }
 
-func (s *Service) GenerateShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, error) {
+func (s *Service) GetShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error) {
 	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
-		return "", err
+		return "", time.Time{}, err
 	}
-	key, err := s.repo.GenerateShoppingListKey(shoppingListId)
+	key, expiresAt, err := s.repo.GetShoppingListKey(shoppingListId)
 	if err != nil {
-		return "", err
+		return "", time.Time{}, err
 	}
-	return fmt.Sprintf(linkPattern, shoppingListId.String(), key.String()), nil
+	return fmt.Sprintf(linkPattern, shoppingListId.String(), key.String()), expiresAt, nil
 }
 
 func (s *Service) JoinShoppingList(shoppingListId, userId, key uuid.UUID) error {

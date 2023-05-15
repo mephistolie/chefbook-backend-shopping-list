@@ -9,6 +9,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/repository"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mq"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/shopping_list"
+	"time"
 )
 
 type Service struct {
@@ -26,7 +27,7 @@ type ShoppingList interface {
 	DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid.UUID) error
 
 	GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]uuid.UUID, error)
-	GenerateShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, error)
+	GetShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error)
 	JoinShoppingList(shoppingListId, userId, key uuid.UUID) error
 	DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error
 }
