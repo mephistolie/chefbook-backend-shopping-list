@@ -113,6 +113,7 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 		Id:          shoppingList.Id.String(),
 		Name:        name,
 		Type:        string(shoppingList.Type),
+		OwnerId:     shoppingList.OwnerId.String(),
 		Purchases:   purchases,
 		RecipeNames: recipeNames,
 		Version:     shoppingList.Version,

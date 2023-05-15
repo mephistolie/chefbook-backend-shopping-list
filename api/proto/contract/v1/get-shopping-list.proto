@@ -15,7 +15,8 @@ message GetShoppingListResponse {
   string id = 1;
   string name = 2;
   string type = 3;
-  repeated Purchase purchases = 4;
-  map<string, string> recipeNames = 5;
-  int32 version = 6;
+  string ownerId = 4;
+  repeated Purchase purchases = 5;
+  map<string, string> recipeNames = 6;
+  int32 version = 7;
 }
