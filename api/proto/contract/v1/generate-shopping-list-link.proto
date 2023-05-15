@@ -1,0 +1,15 @@
+syntax = "proto3";
+package v1;
+
+option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
+
+message GenerateShoppingListLinkRequest {
+  string shoppingListId = 1;
+  string requesterId = 2;
+  string linkPattern = 3;
+}
+
+message GenerateShoppingListLinkResponse {
+  string link = 1;
+  int64 rotationPeriodHours = 2;
+}

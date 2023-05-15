@@ -36,7 +36,7 @@ func (s *ShoppingListServer) CreateSharedShoppingList(_ context.Context, req *ap
 		name = &req.Name
 	}
 
-	if !subscription.IsPremium(req.SubscriptionPlan) {
+	if !subscription.IsPremium(req.SubscriptionPlan) && s.checkSubscription {
 		return nil, fail.GrpcPremiumRequired
 	}
 
@@ -66,24 +66,23 @@ func (s *ShoppingListServer) GetShoppingList(_ context.Context, req *api.GetShop
 }
 
 func (s *ShoppingListServer) SetShoppingListName(_ context.Context, req *api.SetShoppingListNameRequest) (*api.SetShoppingListNameResponse, error) {
-	requesterId, err := uuid.Parse(req.RequesterId)
+	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
-	var shoppingListIdPtr *uuid.UUID = nil
-	if shoppingListId, err := uuid.Parse(req.ShoppingListId); err == nil {
-		shoppingListIdPtr = &shoppingListId
+	shoppingListId, err := uuid.Parse(req.ShoppingListId)
+	if err != nil {
+		return nil, fail.GrpcInvalidBody
 	}
 	var name *string = nil
 	if len(req.Name) > 0 {
+		if len(req.Name) > 64 {
+			return nil, fail.CreateGrpcClient(fail.TypeInvalidBody, "name max length is 64")
+		}
 		name = &req.Name
 	}
 
-	if !subscription.IsPremium(req.SubscriptionPlan) {
-		return nil, fail.GrpcPremiumRequired
-	}
-
-	if err := s.service.SetShoppingListName(shoppingListIdPtr, name, requesterId); err != nil {
+	if err := s.service.SetShoppingListName(shoppingListId, userId, name); err != nil {
 		return nil, err
 	}
 	return &api.SetShoppingListNameResponse{Message: "shopping list name updated"}, nil

@@ -3,7 +3,6 @@ CREATE TYPE shopping_list_type as ENUM ('personal', 'shared');
 CREATE TABLE shopping_lists
 (
     shopping_list_id uuid PRIMARY KEY   NOT NULL UNIQUE DEFAULT gen_random_uuid(),
-    name             varchar(64)                        DEFAULT NULL,
     type             shopping_list_type NOT NULL        DEFAULT 'personal',
     owner_id         uuid               NOT NULL,
     purchases        jsonb              NOT NULL,
@@ -13,9 +12,16 @@ CREATE TABLE shopping_lists
 
 CREATE TABLE shopping_lists_users
 (
-    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) NOT NULL UNIQUE,
+    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) NOT NULL,
     user_id          uuid                                              NOT NULL,
-    accepted         boolean                                           NOT NULL DEFAULT false
+    name             varchar(64) DEFAULT NULL
+);
+
+CREATE TABLE keys
+(
+    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) NOT NULL UNIQUE,
+    key              uuid                                              NOT NULL DEFAULT gen_random_uuid(),
+    expires_at       TIMESTAMP WITH TIME ZONE                          NOT NULL
 );
 
 CREATE TABLE inbox

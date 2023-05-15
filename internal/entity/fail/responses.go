@@ -8,11 +8,14 @@ import (
 var (
 	typeOutdatedVersion       = "outdated_version"
 	typeMaxShoppingListsCount = "max_shopping_lists_count"
+	typePersonalShoppingList  = "personal_shopping_list"
 )
 
 var (
-	GrpcOutdatedVersion      = fail.CreateGrpcConflict(typeOutdatedVersion, "shopping list version is outdated; process current version first")
-	GrpcShoppingListNotFound = fail.CreateGrpcServer(fail.TypeNotFound, "shopping list not found")
+	GrpcOutdatedVersion        = fail.CreateGrpcConflict(typeOutdatedVersion, "shopping list version is outdated; process current version first")
+	GrpcShoppingListNotFound   = fail.CreateGrpcServer(fail.TypeNotFound, "shopping list not found")
+	GrpcPersonalShoppingList   = fail.CreateGrpcClient(typePersonalShoppingList, "personal shopping list can't be shared")
+	GrpcInvalidShoppingListKey = fail.CreateGrpcAccessDenied(fail.TypeAccessDenied, "invalid shopping list key")
 )
 
 func GrpcMaxShoppingListsCount(count int) error {

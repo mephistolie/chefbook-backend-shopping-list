@@ -1,16 +1,11 @@
 package shopping_list
 
 import (
-	"context"
+	"fmt"
 	"github.com/google/uuid"
-	api "github.com/mephistolie/chefbook-backend-auth/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 )
-
-func (s *Service) GetShoppingListInvites(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
-	return s.repo.GetShoppingLists(userId, true)
-}
 
 func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]uuid.UUID, error) {
 	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
@@ -19,39 +14,22 @@ func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([
 	return s.repo.GetShoppingListUsers(shoppingListId)
 }
 
-func (s *Service) InviteShoppingListUser(userId, shoppingListId, requesterId uuid.UUID) error {
+func (s *Service) GenerateShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, error) {
 	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
-		return err
+		return "", err
 	}
-
-	err := s.repo.InviteUserToShoppingList(userId, shoppingListId)
-	if err == nil {
-		go s.processShoppingListUserInvite(shoppingListId, userId)
-	}
-
-	return err
-}
-
-func (s *Service) processShoppingListUserInvite(shoppingListId, userId uuid.UUID) {
-	user, err := s.auth.GetAuthInfo(context.Background(), &api.GetAuthInfoRequest{Id: userId.String()})
+	key, err := s.repo.GenerateShoppingListKey(shoppingListId)
 	if err != nil {
-		return
+		return "", err
 	}
-	if user.IsBlocked {
-		_ = s.repo.DeleteUserFromShoppingList(userId, shoppingListId)
-		return
-	}
-	if user.IsActivated {
-		s.mail.SendShoppingListInviteMail(user.Email)
-	}
+	return fmt.Sprintf(linkPattern, shoppingListId.String(), key.String()), nil
 }
 
-func (s *Service) AcceptShoppingListInvite(userId, shoppingListId uuid.UUID) error {
-	return s.repo.AcceptShoppingListInvite(userId, shoppingListId)
-}
-
-func (s *Service) DeclineShoppingListInvite(userId, shoppingListId uuid.UUID) error {
-	return s.repo.DeleteUserFromShoppingList(userId, shoppingListId)
+func (s *Service) JoinShoppingList(shoppingListId, userId, key uuid.UUID) error {
+	if valid, err := s.repo.IsShoppingListKeyValid(shoppingListId, key); err != nil || !valid {
+		return shoppingListFail.GrpcInvalidShoppingListKey
+	}
+	return s.repo.AddUserToShoppingList(userId, shoppingListId)
 }
 
 func (s *Service) DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error {

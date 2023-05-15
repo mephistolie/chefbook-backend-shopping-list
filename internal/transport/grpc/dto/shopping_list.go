@@ -65,6 +65,11 @@ func NewShoppingListsResponse(shoppingLists []entity.ShoppingListInfo) []*api.Sh
 }
 
 func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppingListResponse {
+	name := ""
+	if shoppingList.Name != nil {
+		name = *shoppingList.Name
+	}
+
 	purchases := make([]*api.Purchase, len(shoppingList.Purchases))
 	for i, purchase := range shoppingList.Purchases {
 		multiplier := 0
@@ -98,8 +103,18 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 		}
 		purchases[i] = &rawPurchase
 	}
+
+	var recipeNames map[string]string
+	for id, name := range shoppingList.RecipeNames {
+		recipeNames[id.String()] = name
+	}
+
 	return &api.GetShoppingListResponse{
-		Purchases: purchases,
-		Version:   shoppingList.Version,
+		Id:          shoppingList.Id.String(),
+		Name:        name,
+		Type:        string(shoppingList.Type),
+		Purchases:   purchases,
+		RecipeNames: recipeNames,
+		Version:     shoppingList.Version,
 	}
 }

@@ -19,15 +19,13 @@ type Config struct {
 	Firebase Firebase
 	Database Database
 	Amqp     Amqp
-	Smtp     Smtp
 
 	AuthService AuthService
 }
 
 type ShoppingList struct {
-	MaxShoppingListsCount     *int
-	MaxShoppingListUsersCount *int
-	CheckSubscription         *bool
+	MaxShoppingListsCount *int
+	CheckSubscription     *bool
 }
 
 type Firebase struct {
@@ -50,14 +48,6 @@ type Amqp struct {
 	VHost    *string
 }
 
-type Smtp struct {
-	Host         *string
-	Port         *int
-	Email        *string
-	Password     *string
-	SendAttempts *int
-}
-
 type AuthService struct {
 	Addr *string
 }
@@ -75,7 +65,6 @@ func (c Config) Print() {
 		"Port: %v\n"+
 		"Logs path: %v\n\n"+
 		"Max shopping lists count: %v\n"+
-		"Max shopping list users count: %v\n"+
 		"Check subscription: %v\n\n"+
 		"Database host: %v\n"+
 		"Database port: %v\n"+
@@ -83,14 +72,11 @@ func (c Config) Print() {
 		"MQ host: %v\n"+
 		"MQ port: %v\n"+
 		"MQ vhost: %v\n\n"+
-		"SMTP host: %v\n"+
-		"SMTP port: %v\n\n"+
 		"Auth Service Address: %v\n",
 		*c.Environment, *c.Port, *c.LogsPath,
-		*c.ShoppingList.MaxShoppingListsCount, *c.ShoppingList.MaxShoppingListUsersCount, *c.ShoppingList.CheckSubscription,
+		*c.ShoppingList.MaxShoppingListsCount, *c.ShoppingList.CheckSubscription,
 		*c.Database.Host, *c.Database.Port, *c.Database.DBName,
 		*c.Amqp.Host, *c.Amqp.Port, *c.Amqp.VHost,
-		*c.Smtp.Host, *c.Smtp.Port,
 		*c.AuthService.Addr,
 	)
 }

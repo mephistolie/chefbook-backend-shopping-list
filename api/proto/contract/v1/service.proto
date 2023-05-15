@@ -9,11 +9,9 @@ import "v1/get-shopping-list.proto";
 import "v1/set-shopping-list-name.proto";
 import "v1/set-shopping-list.proto";
 import "v1/delete-shared-shopping-list.proto";
-import "v1/get-shopping-list-invites.proto";
 import "v1/get-shopping-list-users.proto";
-import "v1/invite-user-to-shopping-list.proto";
-import "v1/accept-shopping-list-invite.proto";
-import "v1/decline-shopping-list-invite.proto";
+import "v1/generate-shopping-list-link.proto";
+import "v1/join-shopping-list.proto";
 import "v1/delete-user-from-shopping-list.proto";
 
 service ShoppingListService {
@@ -26,10 +24,8 @@ service ShoppingListService {
   rpc AddPurchasesToShoppingList(SetShoppingListRequest) returns (SetShoppingListResponse);
   rpc DeleteSharedShoppingList(DeleteSharedShoppingListRequest) returns (DeleteSharedShoppingListResponse);
 
-  rpc GetShoppingListInvites(GetShoppingListInvitesRequest) returns (GetShoppingListInvitesResponse);
   rpc GetShoppingListUsers(GetShoppingListUsersRequest) returns (GetShoppingListUsersResponse);
-  rpc InviteUserToShoppingList(InviteUserToShoppingListRequest) returns (InviteUserToShoppingListResponse);
-  rpc AcceptShoppingListInvite(AcceptShoppingListInviteRequest) returns (AcceptShoppingListInviteResponse);
-  rpc DeclineShoppingListInvite(DeclineShoppingListInviteRequest) returns (DeclineShoppingListInviteResponse);
+  rpc GenerateShoppingListLink(GenerateShoppingListLinkRequest) returns (GenerateShoppingListLinkResponse);
+  rpc JoinShoppingList(JoinShoppingListRequest) returns (JoinShoppingListResponse);
   rpc DeleteUserFromShoppingList(DeleteUserFromShoppingListRequest) returns (DeleteUserFromShoppingListResponse);
 }

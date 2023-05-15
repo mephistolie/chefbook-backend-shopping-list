@@ -16,7 +16,7 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID, onlyPending bool) ([]ent
 	var shoppingLists []entity.ShoppingListInfo
 
 	query := fmt.Sprintf(`
-			SELECT %[1]v.shopping_list_id, %[2]v.name, %[2]v.type, %[2]v.owner_id
+			SELECT %[1]v.shopping_list_id, %[1]v.name, %[2]v.type, %[2]v.owner_id
 			FROM %[1]v
 			LEFT JOIN %[2]v ON %[1]v.shopping_list_id=%[2]v.shopping_list_id
 			WHERE %[1]v.user_id=$1
@@ -158,15 +158,15 @@ func (r *Repository) GetPersonalShoppingListId(userId uuid.UUID) (uuid.UUID, err
 	return id, nil
 }
 
-func (r *Repository) SetShoppingListName(shoppingListId uuid.UUID, name *string) error {
+func (r *Repository) SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error {
 	query := fmt.Sprintf(`
 			UPDATE %s
 			SET name=$1
-			WHERE shopping_list_id=$2
-		`, shoppingListsTable)
+			WHERE shopping_list_id=$2 AND user_id=$3
+		`, usersTable)
 
-	if _, err := r.db.Exec(query, name, shoppingListId); err != nil {
-		log.Errorf("unable to set shopping list %s name: %s", shoppingListId, err)
+	if _, err := r.db.Exec(query, name, shoppingListId, userId); err != nil {
+		log.Errorf("unable to set shopping list %s name for user %s: %s", shoppingListId, userId, err)
 		return fail.GrpcUnknown
 	}
 

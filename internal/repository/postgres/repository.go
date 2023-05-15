@@ -15,15 +15,15 @@ import (
 const (
 	shoppingListsTable = "shopping_lists"
 	usersTable         = "shopping_lists_users"
+	keysTable          = "keys"
 	inboxTable         = "inbox"
 
 	errUniqueViolation = "23505"
 )
 
 type Repository struct {
-	db                        *sqlx.DB
-	maxShoppingListsCount     int
-	maxShoppingListUsersCount int
+	db                    *sqlx.DB
+	maxShoppingListsCount int
 }
 
 func Connect(cfg config.Database) (*sqlx.DB, error) {
@@ -39,9 +39,8 @@ func Connect(cfg config.Database) (*sqlx.DB, error) {
 
 func NewRepository(db *sqlx.DB, cfg config.ShoppingList) *Repository {
 	return &Repository{
-		db:                        db,
-		maxShoppingListsCount:     *cfg.MaxShoppingListUsersCount,
-		maxShoppingListUsersCount: *cfg.MaxShoppingListUsersCount,
+		db:                    db,
+		maxShoppingListsCount: *cfg.MaxShoppingListsCount,
 	}
 }
 

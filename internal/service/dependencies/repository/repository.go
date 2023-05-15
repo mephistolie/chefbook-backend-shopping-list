@@ -11,7 +11,7 @@ type ShoppingList interface {
 	DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
 
 	GetShoppingLists(userId uuid.UUID, onlyPending bool) ([]entity.ShoppingListInfo, error)
-	SetShoppingListName(shoppingListId uuid.UUID, name *string) error
+	SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error
 	CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error)
 	GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingList, error)
 	GetPersonalShoppingListId(userId uuid.UUID) (uuid.UUID, error)
@@ -20,7 +20,8 @@ type ShoppingList interface {
 	DeleteSharedShoppingList(shoppingListId uuid.UUID) error
 
 	GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID, error)
-	InviteUserToShoppingList(userId, shoppingListId uuid.UUID) error
-	AcceptShoppingListInvite(userId, shoppingListId uuid.UUID) error
+	GenerateShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, error)
+	IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool, error)
+	AddUserToShoppingList(userId, shoppingListId uuid.UUID) error
 	DeleteUserFromShoppingList(userId, shoppingListId uuid.UUID) error
 }

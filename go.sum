@@ -864,6 +864,8 @@ github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0 h1:pNXz1Z9XPn7iA8
 github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0/go.mod h1:wose8RxMtomzIK9cEjBC0FyO02GSna8eswYkYW1dDFE=
 github.com/mephistolie/chefbook-backend-common/subscription v0.8.0 h1:jN3csvWr+j1CbaKgls3txwBLq18bb3NN9I85b58WogI=
 github.com/mephistolie/chefbook-backend-common/subscription v0.8.0/go.mod h1:5/u9h9p9rHoAiQTk3SlYDhQF8tFGqkRoLWfJUiBI4os=
+github.com/mephistolie/chefbook-backend-shopping-list/api/v2 v2.0.0 h1:TEqQldCj4touqHyPOliBJIz0ObwQ/jjIXTzggyyLPtY=
+github.com/mephistolie/chefbook-backend-shopping-list/api/v2 v2.0.0/go.mod h1:pICOlHjgx5cBZu8Gk23ylWDHoLU/Go4v6b8McfvxI1E=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/miekg/pkcs11 v1.0.3/go.mod h1:XsNlhZGX73bx86s2hdc/FuaLm2CPZJemRLMA+WTFxgs=
 github.com/mistifyio/go-zfs v2.1.2-0.20190413222219-f784269be439+incompatible/go.mod h1:8AuVvqP/mXw1px98n46wfvcGfQ4ci2FwoAjKYxuo3Z4=

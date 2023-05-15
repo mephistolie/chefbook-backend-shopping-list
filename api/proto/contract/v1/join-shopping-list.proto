@@ -3,11 +3,12 @@ package v1;
 
 option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
 
-message AcceptShoppingListInviteRequest {
-  string userId = 1;
-  string shoppingListId = 2;
+message JoinShoppingListRequest {
+  string shoppingListId = 1;
+  string key = 2;
+  string userId = 3;
 }
 
-message AcceptShoppingListInviteResponse {
+message JoinShoppingListResponse {
   string message = 1;
 }

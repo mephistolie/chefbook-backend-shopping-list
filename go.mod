@@ -9,11 +9,11 @@ require (
 	github.com/mephistolie/chefbook-backend-auth/api v1.3.1
 	github.com/mephistolie/chefbook-backend-common/firebase v0.6.0
 	github.com/mephistolie/chefbook-backend-common/log v0.6.0
-	github.com/mephistolie/chefbook-backend-common/mail v0.6.0
 	github.com/mephistolie/chefbook-backend-common/migrate/sql v0.6.0
 	github.com/mephistolie/chefbook-backend-common/responses v0.8.0
 	github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0
 	github.com/mephistolie/chefbook-backend-common/subscription v0.8.0
+	github.com/mephistolie/chefbook-backend-shopping-list/api/v2 v2.0.0
 	github.com/peterbourgon/ff/v3 v3.3.0
 	github.com/wagslane/go-rabbitmq v0.12.3
 	google.golang.org/grpc v1.54.0

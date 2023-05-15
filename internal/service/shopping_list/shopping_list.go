@@ -41,19 +41,8 @@ func (s *Service) getPersonalShoppingList(userId uuid.UUID) (entity.ShoppingList
 	return s.repo.GetShoppingList(id)
 }
 
-func (s *Service) SetShoppingListName(shoppingListId *uuid.UUID, name *string, requesterId uuid.UUID) error {
-	if shoppingListId == nil {
-		id, err := s.repo.GetPersonalShoppingListId(requesterId)
-		if err != nil {
-			return err
-		}
-		shoppingListId = &id
-	}
-
-	if err := s.checkUserIsShoppingListOwner(requesterId, *shoppingListId); err != nil {
-		return err
-	}
-	return s.repo.SetShoppingListName(*shoppingListId, name)
+func (s *Service) SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error {
+	return s.repo.SetShoppingListName(shoppingListId, userId, name)
 }
 
 func (s *Service) SetShoppingList(input entity.ShoppingListInput) (int32, error) {

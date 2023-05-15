@@ -1,11 +1,12 @@
 package postgres
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
+	"time"
 )
 
 func (r *Repository) GetShoppingListOwner(shoppingListId uuid.UUID) (uuid.UUID, error) {
@@ -53,42 +54,90 @@ func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID
 	return users, nil
 }
 
-func (r *Repository) InviteUserToShoppingList(userId, shoppingListId uuid.UUID) error {
+func (r *Repository) GenerateShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, error) {
 	tx, err := r.startTransaction()
 	if err != nil {
-		return err
+		return uuid.UUID{}, err
 	}
 
-	var count int
-	getShoppingListUsersCountQuery := fmt.Sprintf(`
-			SELECT count(shopping_list_id)
-			FROM %s
-			WHERE shopping_list_id=$1
-		`, usersTable)
-	row := tx.QueryRow(getShoppingListUsersCountQuery)
-	if err := row.Scan(&count); err != nil {
-		log.Errorf("unable to get shopping list %s users count: %s", shoppingListId, err)
-		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
+	var key uuid.UUID
+	var expiresAt time.Time
+
+	createKeyQuery := fmt.Sprintf(`
+			INSERT INTO %[1]v (shopping_list_id, expires_at)
+			VALUES ($1, $2)
+			WHERE NOT EXISTS
+				(
+					SELECT key, expires_at
+					FROM %[1]v
+					WHERE shopping_list_id=$1
+				)
+			RETURNING key, expires_at
+		`, keysTable)
+
+	row := tx.QueryRow(createKeyQuery, shoppingListId, time.Now().Add(24*time.Hour))
+	if err := row.Scan(&key, &expiresAt); err != nil {
+		log.Errorf("unable to create shopping list %s key", shoppingListId, err)
+		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
-	if count >= r.maxShoppingListUsersCount {
-		log.Warnf("user %s tries to invite guest to shopping list over maximum users count %s", userId, r.maxShoppingListUsersCount)
-		return errorWithTransactionRollback(tx, shoppingListFail.GrpcMaxShoppingListUsersCount(count))
+	if expiresAt.Unix() < time.Now().Unix() {
+		return r.updateShoppingListKey(tx, shoppingListId)
 	}
 
-	inviteUserQuery := fmt.Sprintf(`
+	return key, commitTransaction(tx)
+}
+
+func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID) (uuid.UUID, error) {
+	key := uuid.New()
+
+	updateKeyQuery := fmt.Sprintf(`
+			UPDATE %s
+			SET key=$1, expires_at=$2
+			WHERE shopping_list_id=$3
+		`, keysTable)
+
+	if _, err := tx.Exec(updateKeyQuery, key, time.Now().Add(24*time.Hour), shoppingListId); err != nil {
+		log.Errorf("unable to update shopping list %s key", shoppingListId, err)
+		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
+	}
+
+	return key, commitTransaction(tx)
+}
+
+func (r *Repository) IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool, error) {
+	valid := false
+
+	query := fmt.Sprintf(`
+			SELECT EXISTS
+			(
+				SELECT 1
+				FROM %s
+				WHERE shopping_list_id=$1 AND key=$2
+			)
+		`, keysTable)
+
+	if err := r.db.Get(&valid, query, shoppingListId, key); err != nil {
+		log.Errorf("unable to validate shopping list %s key: %s", shoppingListId, err)
+		return false, fail.GrpcUnknown
+	}
+	return true, nil
+}
+
+func (r *Repository) AddUserToShoppingList(userId, shoppingListId uuid.UUID) error {
+	query := fmt.Sprintf(`
 			INSERT INTO %[1]v (shopping_list_id, user_id)
 			VALUES ($1, $2)
-			WHERE
-				NOT EXISTS (
-					SELECT shopping_list_id FROM %[1]v WHERE shopping_list_id=$1 AND user_id=$2
+			WHERE NOT EXISTS
+				(
+					SELECT shopping_list_id
+					WHERE shopping_list_id=$1 AND user_id=$2
 				)
 		`, usersTable)
 
-	if _, err = tx.Exec(inviteUserQuery, shoppingListId); err != nil {
-		log.Errorf("unable to add connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
+	if _, err := r.db.Exec(query, shoppingListId, userId); err != nil {
+		log.Errorf("unable to add user %s to shopping list %s: %s", userId, shoppingListId, err)
 		return fail.GrpcUnknown
 	}
-
 	return nil
 }
 

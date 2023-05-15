@@ -7,8 +7,6 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/repository"
-	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/services"
-	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mq"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/shopping_list"
 )
@@ -22,16 +20,14 @@ type ShoppingList interface {
 	GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error)
 	CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error)
 	GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (entity.ShoppingList, error)
-	SetShoppingListName(shoppingListId *uuid.UUID, name *string, requesterId uuid.UUID) error
+	SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error
 	SetShoppingList(input entity.ShoppingListInput) (int32, error)
 	AddPurchasesToShoppingList(input entity.ShoppingListInput) (int32, error)
 	DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid.UUID) error
 
-	GetShoppingListInvites(userId uuid.UUID) ([]entity.ShoppingListInfo, error)
 	GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]uuid.UUID, error)
-	InviteShoppingListUser(userId, shoppingListId, requesterId uuid.UUID) error
-	AcceptShoppingListInvite(userId, shoppingListId uuid.UUID) error
-	DeclineShoppingListInvite(userId, shoppingListId uuid.UUID) error
+	GenerateShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, error)
+	JoinShoppingList(shoppingListId, userId, key uuid.UUID) error
 	DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error
 }
 
@@ -44,7 +40,6 @@ type MQ interface {
 func New(
 	cfg *config.Config,
 	repo repository.ShoppingList,
-	remoteServices *services.Remote,
 ) (*Service, error) {
 	var err error = nil
 	var client *firebase.Client = nil
@@ -57,13 +52,8 @@ func New(
 		log.Info("Firebase client initialized")
 	}
 
-	mailService, err := mail.NewService(cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Service{
-		ShoppingList: shopping_list.NewService(repo, remoteServices.Auth, mailService),
+		ShoppingList: shopping_list.NewService(repo),
 		MQ:           mq.NewService(repo, client),
 	}, nil
 }
