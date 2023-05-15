@@ -16,6 +16,7 @@ type ShoppingList interface {
 	CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error)
 	GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingList, error)
 	GetPersonalShoppingListId(userId uuid.UUID) (uuid.UUID, error)
+	GetShoppingListType(shoppingListId uuid.UUID) (string, error)
 	GetShoppingListOwner(shoppingListId uuid.UUID) (uuid.UUID, error)
 	SetShoppingList(input entity.ShoppingListInput) (int32, error)
 	DeleteSharedShoppingList(shoppingListId uuid.UUID) error

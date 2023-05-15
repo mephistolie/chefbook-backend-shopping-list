@@ -5,8 +5,8 @@ import "github.com/google/uuid"
 type ShoppingListType string
 
 var (
-	ShoppingListTypePersonal = "personal"
-	ShoppingListTypeShared   = "shared"
+	ShoppingListTypePersonal ShoppingListType = "personal"
+	ShoppingListTypeShared   ShoppingListType = "shared"
 )
 
 type ShoppingListInfo struct {

@@ -87,6 +87,22 @@ func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, ti
 	return key, expiresAt, commitTransaction(tx)
 }
 
+func (r *Repository) GetShoppingListType(shoppingListId uuid.UUID) (string, error) {
+	shoppingListType := ""
+
+	query := fmt.Sprintf(`
+			SELECT type
+			FROM %s
+			WHERE shopping_list_id=$1
+		`, shoppingListsTable)
+
+	if err := r.db.Get(&shoppingListType, query, shoppingListId); err != nil {
+		log.Errorf("unable to get shopping list %s type: %s", shoppingListId, err)
+		return "", fail.GrpcUnknown
+	}
+	return shoppingListType, nil
+}
+
 func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
 	key := uuid.New()
 	expiresAt := time.Now().Add(r.keyTtl)

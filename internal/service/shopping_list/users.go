@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 	"time"
 )
@@ -16,9 +17,14 @@ func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([
 }
 
 func (s *Service) GetShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error) {
+	if shoppingListType, err := s.repo.GetShoppingListType(shoppingListId); err != nil || shoppingListType != string(entity.ShoppingListTypeShared) {
+		return "", time.Time{}, shoppingListFail.GrpcPersonalShoppingList
+	}
+
 	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
 		return "", time.Time{}, err
 	}
+	
 	key, expiresAt, err := s.repo.GetShoppingListKey(shoppingListId)
 	if err != nil {
 		return "", time.Time{}, err
