@@ -27,7 +27,7 @@ const (
 	ShoppingListService_AddPurchasesToShoppingList_FullMethodName = "/v1.ShoppingListService/AddPurchasesToShoppingList"
 	ShoppingListService_DeleteSharedShoppingList_FullMethodName   = "/v1.ShoppingListService/DeleteSharedShoppingList"
 	ShoppingListService_GetShoppingListUsers_FullMethodName       = "/v1.ShoppingListService/GetShoppingListUsers"
-	ShoppingListService_GetShoppingListLink_FullMethodName        = "/v1.ShoppingListService/GetShoppingListLink"
+	ShoppingListService_GetSharedShoppingListLink_FullMethodName  = "/v1.ShoppingListService/GetSharedShoppingListLink"
 	ShoppingListService_JoinShoppingList_FullMethodName           = "/v1.ShoppingListService/JoinShoppingList"
 	ShoppingListService_DeleteUserFromShoppingList_FullMethodName = "/v1.ShoppingListService/DeleteUserFromShoppingList"
 )
@@ -44,7 +44,7 @@ type ShoppingListServiceClient interface {
 	AddPurchasesToShoppingList(ctx context.Context, in *SetShoppingListRequest, opts ...grpc.CallOption) (*SetShoppingListResponse, error)
 	DeleteSharedShoppingList(ctx context.Context, in *DeleteSharedShoppingListRequest, opts ...grpc.CallOption) (*DeleteSharedShoppingListResponse, error)
 	GetShoppingListUsers(ctx context.Context, in *GetShoppingListUsersRequest, opts ...grpc.CallOption) (*GetShoppingListUsersResponse, error)
-	GetShoppingListLink(ctx context.Context, in *GetShoppingListLinkRequest, opts ...grpc.CallOption) (*GetShoppingListLinkResponse, error)
+	GetSharedShoppingListLink(ctx context.Context, in *GetSharedShoppingListLinkRequest, opts ...grpc.CallOption) (*GetSharedShoppingListLinkResponse, error)
 	JoinShoppingList(ctx context.Context, in *JoinShoppingListRequest, opts ...grpc.CallOption) (*JoinShoppingListResponse, error)
 	DeleteUserFromShoppingList(ctx context.Context, in *DeleteUserFromShoppingListRequest, opts ...grpc.CallOption) (*DeleteUserFromShoppingListResponse, error)
 }
@@ -129,9 +129,9 @@ func (c *shoppingListServiceClient) GetShoppingListUsers(ctx context.Context, in
 	return out, nil
 }
 
-func (c *shoppingListServiceClient) GetShoppingListLink(ctx context.Context, in *GetShoppingListLinkRequest, opts ...grpc.CallOption) (*GetShoppingListLinkResponse, error) {
-	out := new(GetShoppingListLinkResponse)
-	err := c.cc.Invoke(ctx, ShoppingListService_GetShoppingListLink_FullMethodName, in, out, opts...)
+func (c *shoppingListServiceClient) GetSharedShoppingListLink(ctx context.Context, in *GetSharedShoppingListLinkRequest, opts ...grpc.CallOption) (*GetSharedShoppingListLinkResponse, error) {
+	out := new(GetSharedShoppingListLinkResponse)
+	err := c.cc.Invoke(ctx, ShoppingListService_GetSharedShoppingListLink_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ type ShoppingListServiceServer interface {
 	AddPurchasesToShoppingList(context.Context, *SetShoppingListRequest) (*SetShoppingListResponse, error)
 	DeleteSharedShoppingList(context.Context, *DeleteSharedShoppingListRequest) (*DeleteSharedShoppingListResponse, error)
 	GetShoppingListUsers(context.Context, *GetShoppingListUsersRequest) (*GetShoppingListUsersResponse, error)
-	GetShoppingListLink(context.Context, *GetShoppingListLinkRequest) (*GetShoppingListLinkResponse, error)
+	GetSharedShoppingListLink(context.Context, *GetSharedShoppingListLinkRequest) (*GetSharedShoppingListLinkResponse, error)
 	JoinShoppingList(context.Context, *JoinShoppingListRequest) (*JoinShoppingListResponse, error)
 	DeleteUserFromShoppingList(context.Context, *DeleteUserFromShoppingListRequest) (*DeleteUserFromShoppingListResponse, error)
 	mustEmbedUnimplementedShoppingListServiceServer()
@@ -202,8 +202,8 @@ func (UnimplementedShoppingListServiceServer) DeleteSharedShoppingList(context.C
 func (UnimplementedShoppingListServiceServer) GetShoppingListUsers(context.Context, *GetShoppingListUsersRequest) (*GetShoppingListUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetShoppingListUsers not implemented")
 }
-func (UnimplementedShoppingListServiceServer) GetShoppingListLink(context.Context, *GetShoppingListLinkRequest) (*GetShoppingListLinkResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetShoppingListLink not implemented")
+func (UnimplementedShoppingListServiceServer) GetSharedShoppingListLink(context.Context, *GetSharedShoppingListLinkRequest) (*GetSharedShoppingListLinkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSharedShoppingListLink not implemented")
 }
 func (UnimplementedShoppingListServiceServer) JoinShoppingList(context.Context, *JoinShoppingListRequest) (*JoinShoppingListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinShoppingList not implemented")
@@ -368,20 +368,20 @@ func _ShoppingListService_GetShoppingListUsers_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ShoppingListService_GetShoppingListLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetShoppingListLinkRequest)
+func _ShoppingListService_GetSharedShoppingListLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSharedShoppingListLinkRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShoppingListServiceServer).GetShoppingListLink(ctx, in)
+		return srv.(ShoppingListServiceServer).GetSharedShoppingListLink(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ShoppingListService_GetShoppingListLink_FullMethodName,
+		FullMethod: ShoppingListService_GetSharedShoppingListLink_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShoppingListServiceServer).GetShoppingListLink(ctx, req.(*GetShoppingListLinkRequest))
+		return srv.(ShoppingListServiceServer).GetSharedShoppingListLink(ctx, req.(*GetSharedShoppingListLinkRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -462,8 +462,8 @@ var ShoppingListService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ShoppingListService_GetShoppingListUsers_Handler,
 		},
 		{
-			MethodName: "GetShoppingListLink",
-			Handler:    _ShoppingListService_GetShoppingListLink_Handler,
+			MethodName: "GetSharedShoppingListLink",
+			Handler:    _ShoppingListService_GetSharedShoppingListLink_Handler,
 		},
 		{
 			MethodName: "JoinShoppingList",

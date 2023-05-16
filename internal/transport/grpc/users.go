@@ -28,7 +28,7 @@ func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.Ge
 	return &api.GetShoppingListUsersResponse{Users: dto.NewInvitesResponse(invites)}, nil
 }
 
-func (s *ShoppingListServer) GetShoppingListLink(_ context.Context, req *api.GetShoppingListLinkRequest) (*api.GetShoppingListLinkResponse, error) {
+func (s *ShoppingListServer) GetSharedShoppingListLink(_ context.Context, req *api.GetSharedShoppingListLinkRequest) (*api.GetSharedShoppingListLinkResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -43,7 +43,7 @@ func (s *ShoppingListServer) GetShoppingListLink(_ context.Context, req *api.Get
 		return nil, err
 	}
 
-	return &api.GetShoppingListLinkResponse{Link: link, ExpiresAt: timestamppb.New(expiresAt)}, nil
+	return &api.GetSharedShoppingListLinkResponse{Link: link, ExpiresAt: timestamppb.New(expiresAt)}, nil
 }
 
 func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinShoppingListRequest) (*api.JoinShoppingListResponse, error) {

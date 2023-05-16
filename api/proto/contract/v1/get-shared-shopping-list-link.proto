@@ -5,13 +5,13 @@ option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/p
 
 import "google/protobuf/timestamp.proto";
 
-message GetShoppingListLinkRequest {
+message GetSharedShoppingListLinkRequest {
   string shoppingListId = 1;
   string requesterId = 2;
   string linkPattern = 3;
 }
 
-message GetShoppingListLinkResponse {
+message GetSharedShoppingListLinkResponse {
   string link = 1;
   google.protobuf.Timestamp expiresAt = 2;
 }

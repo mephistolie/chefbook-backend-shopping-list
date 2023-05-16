@@ -60,7 +60,7 @@ func errorWithTransactionRollback(tx *sql.Tx, err error) error {
 	if err = tx.Rollback(); err != nil {
 		log.Error("unable to rollback transaction: ", err)
 	}
-	return nil
+	return err
 }
 
 func commitTransaction(tx *sql.Tx) error {

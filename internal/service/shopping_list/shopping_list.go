@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Service) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
-	return s.repo.GetShoppingLists(userId, false)
+	return s.repo.GetShoppingLists(userId)
 }
 
 func (s *Service) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error) {

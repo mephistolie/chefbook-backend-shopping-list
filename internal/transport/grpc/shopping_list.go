@@ -33,6 +33,9 @@ func (s *ShoppingListServer) CreateSharedShoppingList(_ context.Context, req *ap
 	}
 	var name *string = nil
 	if len(req.Name) > 0 {
+		if len(req.Name) > 64 {
+			return nil, fail.CreateGrpcClient(fail.TypeInvalidBody, "name max length is 64")
+		}
 		name = &req.Name
 	}
 

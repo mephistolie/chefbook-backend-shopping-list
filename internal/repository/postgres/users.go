@@ -144,32 +144,15 @@ func (r *Repository) AddUserToShoppingList(userId, shoppingListId uuid.UUID) err
 	query := fmt.Sprintf(`
 			INSERT INTO %[1]v (shopping_list_id, user_id)
 			VALUES ($1, $2)
-			WHERE NOT EXISTS
-				(
-					SELECT shopping_list_id
-					WHERE shopping_list_id=$1 AND user_id=$2
-				)
 		`, usersTable)
 
 	if _, err := r.db.Exec(query, shoppingListId, userId); err != nil {
+		if isUniqueViolationError(err) {
+			return nil
+		}
 		log.Errorf("unable to add user %s to shopping list %s: %s", userId, shoppingListId, err)
 		return fail.GrpcUnknown
 	}
-	return nil
-}
-
-func (r *Repository) AcceptShoppingListInvite(userId, shoppingListId uuid.UUID) error {
-	query := fmt.Sprintf(`
-			UPDATE %s
-			SET accepted=true
-			WHERE shopping_list_id=$1 AND user_id=$1
-		`, usersTable)
-
-	if _, err := r.db.Exec(query, shoppingListId, userId); err != nil {
-		log.Errorf("unable to accept shopping list %s invite for user %s: %s", shoppingListId, userId, err)
-		return fail.GrpcUnknown
-	}
-
 	return nil
 }
 

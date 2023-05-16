@@ -2,14 +2,12 @@ package postgres
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
-	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres/dto"
 )
 
 func (r *Repository) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
@@ -22,25 +20,24 @@ func (r *Repository) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid
 		}
 	}
 
-	bsonShoppingList, err := json.Marshal([]dto.Purchase{})
-	if err != nil {
-		log.Errorf("unable to marshal purchases for user %s: %s", userId, err)
-		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
-	}
-
-	bsonRecipeNames, err := json.Marshal(entity.RecipeNames{})
-	if err != nil {
-		log.Errorf("unable to marshal recipe names for user %s: %s", userId, err)
-		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
-	}
-
-	query := fmt.Sprintf(`
-			INSERT INTO %s (owner_id, purchases, recipe_names)
-			VALUES ($1, $2, $3)
+	shoppingListId := uuid.New()
+	createShoppingListQuery := fmt.Sprintf(`
+			INSERT INTO %s (shopping_list_id, owner_id)
+			VALUES ($1, $2)
 		`, shoppingListsTable)
 
-	if _, err = tx.Exec(query, userId, bsonShoppingList, bsonRecipeNames); err != nil {
-		log.Errorf("unable to add user %s: %s", userId, err)
+	if _, err = tx.Exec(createShoppingListQuery, shoppingListId, userId); err != nil {
+		log.Errorf("unable to create shopping list for user %s: %s", userId, err)
+		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
+	}
+
+	createConnectionQuery := fmt.Sprintf(`
+			INSERT INTO %s (shopping_list_id, user_id)
+			VALUES ($1, $2)
+		`, usersTable)
+
+	if _, err = tx.Exec(createConnectionQuery, shoppingListId, userId); err != nil {
+		log.Errorf("unable to create connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 

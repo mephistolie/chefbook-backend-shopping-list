@@ -12,7 +12,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres/dto"
 )
 
-func (r *Repository) GetShoppingLists(userId uuid.UUID, onlyPending bool) ([]entity.ShoppingListInfo, error) {
+func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
 	var shoppingLists []entity.ShoppingListInfo
 
 	query := fmt.Sprintf(`
@@ -21,9 +21,6 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID, onlyPending bool) ([]ent
 			LEFT JOIN %[2]v ON %[1]v.shopping_list_id=%[2]v.shopping_list_id
 			WHERE %[1]v.user_id=$1
 		`, usersTable, shoppingListsTable)
-	if onlyPending {
-		query = query + fmt.Sprintf(" AND %s.accepted=false", usersTable)
-	}
 
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
@@ -60,25 +57,28 @@ func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *
 		return uuid.UUID{}, err
 	}
 
-	bsonShoppingList, err := json.Marshal([]dto.Purchase{})
+	bsonPurchases, bsonRecipeNames, err := marshalShoppingList([]entity.Purchase{}, map[uuid.UUID]string{})
 	if err != nil {
-		log.Errorf("unable to marshal purchases for user %s: %s", userId, err)
-		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
+		return uuid.UUID{}, errorWithTransactionRollback(tx, err)
 	}
 
-	bsonRecipeNames, err := json.Marshal(entity.RecipeNames{})
-	if err != nil {
-		log.Errorf("unable to marshal recipe names for user %s: %s", userId, err)
-		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
-	}
-
-	query := fmt.Sprintf(`
-			INSERT INTO %s (shopping_list_id, name, type, owner_id, purchases, recipe_names)
-			VALUES ($1, $2, 'shared', $3, $4, $5)
+	createShoppingListQuery := fmt.Sprintf(`
+			INSERT INTO %s (shopping_list_id, type, owner_id, purchases, recipe_names)
+			VALUES ($1, 'shared', $2, $3, $4)
 		`, shoppingListsTable)
 
-	if _, err := tx.Exec(query, id, name, userId, bsonShoppingList, bsonRecipeNames); err != nil {
+	if _, err := tx.Exec(createShoppingListQuery, id, userId, bsonPurchases, bsonRecipeNames); err != nil {
 		log.Errorf("unable to create shared shopping list for user %s: %s", userId, err)
+		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
+	}
+
+	createConnectionQuery := fmt.Sprintf(`
+			INSERT INTO %s (shopping_list_id, user_id, name)
+			VALUES ($1, $2, $3)
+		`, usersTable)
+
+	if _, err := tx.Exec(createConnectionQuery, id, userId, name); err != nil {
+		log.Errorf("unable to create connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
 		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 
@@ -113,10 +113,11 @@ func (r *Repository) GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingL
 	var purchases []dto.Purchase
 
 	query := fmt.Sprintf(`
-			SELECT name, type, purchases, recipe_names, owner_id, version
-			FROM %s
-			WHERE shopping_list_id=$1
-		`, shoppingListsTable)
+			SELECT %[2]v.name, %[1]v.type, %[1]v.purchases, %[1]v.recipe_names, %[1]v.owner_id, %[1]v.version
+			FROM %[1]v
+			LEFT JOIN %[2]v ON %[1]v.shopping_list_id=%[2]v.shopping_list_id
+			WHERE %[1]v.shopping_list_id=$1
+		`, shoppingListsTable, usersTable)
 
 	row := r.db.QueryRow(query, shoppingListId)
 	if err := row.Scan(&shoppingList.Name, &shoppingList.Type, &bsonPurchases, &bsonRecipeNames, &shoppingList.OwnerId,
@@ -212,16 +213,9 @@ func (r *Repository) DeleteSharedShoppingList(shoppingListId uuid.UUID) error {
 }
 
 func getSetShoppingListBaseQuery(purchases []entity.Purchase, recipeNames entity.RecipeNames) (string, []byte, []byte, error) {
-	bsonPurchases, err := json.Marshal(dto.NewPurchasesDto(purchases))
+	bsonPurchases, bsonRecipeNames, err := marshalShoppingList(purchases, recipeNames)
 	if err != nil {
-		log.Errorf("unable to marshal shopping list: %s", err)
-		return "", nil, nil, shoppingListFail.GrpcShoppingListNotFound
-	}
-
-	bsonRecipeNames, err := json.Marshal(recipeNames)
-	if err != nil {
-		log.Errorf("unable to marshal shopping list: %s", err)
-		return "", nil, nil, shoppingListFail.GrpcShoppingListNotFound
+		return "", nil, nil, err
 	}
 
 	setShoppingListQuery := fmt.Sprintf(`
@@ -231,4 +225,20 @@ func getSetShoppingListBaseQuery(purchases []entity.Purchase, recipeNames entity
 		`, shoppingListsTable)
 
 	return setShoppingListQuery, bsonPurchases, bsonRecipeNames, nil
+}
+
+func marshalShoppingList(purchases []entity.Purchase, recipeNames entity.RecipeNames) ([]byte, []byte, error) {
+	bsonPurchases, err := json.Marshal(dto.NewPurchasesDto(purchases))
+	if err != nil {
+		log.Errorf("unable to marshal shopping list purchases: %s", err)
+		return nil, nil, fail.GrpcUnknown
+	}
+
+	bsonRecipeNames, err := json.Marshal(recipeNames)
+	if err != nil {
+		log.Errorf("unable to marshal shopping list recipe names: %s", err)
+		return nil, nil, fail.GrpcUnknown
+	}
+
+	return bsonPurchases, bsonRecipeNames, nil
 }

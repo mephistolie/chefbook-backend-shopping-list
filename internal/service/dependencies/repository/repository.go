@@ -11,7 +11,7 @@ type ShoppingList interface {
 	ImportFirebaseShoppingList(shoppingListId uuid.UUID, purchases []entity.Purchase, messageId uuid.UUID) error
 	DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
 
-	GetShoppingLists(userId uuid.UUID, onlyPending bool) ([]entity.ShoppingListInfo, error)
+	GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error)
 	SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error
 	CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error)
 	GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingList, error)

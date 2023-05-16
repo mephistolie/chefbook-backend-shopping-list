@@ -46,6 +46,8 @@ spec:
               value: {{ .Values.config.maxShoppingLists | quote }}
             - name: SHOPPING_LIST_KEY_TTL
               value: {{ .Values.config.shoppingListKeyTtl | quote }}
+            - name: CHECK_SUBSCRIPTION
+              value: {{ .Values.config.checkSubscription | quote }}
 
             # Firebase
 
@@ -92,27 +94,6 @@ spec:
                   key: {{ .Values.secrets.rabbitmq.passwordRef }}
             - name: AMQP_VHOST
               value: {{ .Values.config.rabbitmq.vhost }}
-
-            # SMTP
-
-            - name: SMTP_HOST
-              value: {{ .Values.config.smtp.host }}
-            - name: SMTP_PORT
-              value: {{ .Values.config.smtp.port | quote }}
-            - name: SMTP_EMAIL
-              value: {{ .Values.config.smtp.email }}
-            - name: SMTP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets.smtp.name }}
-                  key: {{ .Values.secrets.smtp.passwordRef }}
-            - name: SMTP_ATTEMPTS
-              value: {{ .Values.config.smtp.sendAttempts | quote }}
-
-            # Auth Microservice
-
-            - name: AUTH_ADDR
-              value: "{{ .Values.services.auth.name }}.{{ .Values.services.auth.namespace | default .Release.Namespace }}.svc.cluster.local:{{ .Values.services.auth.port }}"
 
           ports:
             - name: http
