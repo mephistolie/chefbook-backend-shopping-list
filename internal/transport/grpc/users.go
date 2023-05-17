@@ -12,11 +12,11 @@ import (
 
 func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.GetShoppingListUsersRequest) (*api.GetShoppingListUsersResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
-	if err == nil {
+	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 	shoppingListId, err := uuid.Parse(req.ShoppingListId)
-	if err == nil {
+	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 
@@ -52,11 +52,11 @@ func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinSh
 		return nil, fail.GrpcInvalidBody
 	}
 	shoppingListId, err := uuid.Parse(req.ShoppingListId)
-	if err == nil {
+	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 	key, err := uuid.Parse(req.Key)
-	if err == nil {
+	if err != nil {
 		return nil, shoppingListFail.GrpcInvalidShoppingListKey
 	}
 
@@ -70,7 +70,7 @@ func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinSh
 
 func (s *ShoppingListServer) DeleteUserFromShoppingList(_ context.Context, req *api.DeleteUserFromShoppingListRequest) (*api.DeleteUserFromShoppingListResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
-	if err == nil {
+	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 	userId, err := uuid.Parse(req.UserId)
@@ -78,7 +78,7 @@ func (s *ShoppingListServer) DeleteUserFromShoppingList(_ context.Context, req *
 		return nil, fail.GrpcInvalidBody
 	}
 	shoppingListId, err := uuid.Parse(req.ShoppingListId)
-	if err == nil {
+	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 

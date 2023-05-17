@@ -15,6 +15,9 @@ func parsePurchases(rawPurchases []*api.Purchase) ([]entity.Purchase, []uuid.UUI
 		if err != nil {
 			continue
 		}
+		if len(rawPurchase.Name) == 0 {
+			continue
+		}
 
 		var multiplierPtr *int = nil
 		if rawPurchase.Multiplier > 0 {

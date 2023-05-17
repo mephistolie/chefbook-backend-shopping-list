@@ -42,7 +42,7 @@ func BindSetShoppingListRequest(req *api.SetShoppingListRequest) (entity.Shoppin
 }
 
 func parseRecipeNames(request map[string]string, usedIds []uuid.UUID) map[uuid.UUID]string {
-	var names map[uuid.UUID]string
+	names := map[uuid.UUID]string{}
 	for _, id := range usedIds {
 		if name, ok := request[id.String()]; ok {
 			names[id] = name
@@ -104,7 +104,7 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 		purchases[i] = &rawPurchase
 	}
 
-	var recipeNames map[string]string
+	recipeNames := map[string]string{}
 	for id, name := range shoppingList.RecipeNames {
 		recipeNames[id.String()] = name
 	}

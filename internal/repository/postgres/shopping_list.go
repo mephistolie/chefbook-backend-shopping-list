@@ -57,17 +57,12 @@ func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *
 		return uuid.UUID{}, err
 	}
 
-	bsonPurchases, bsonRecipeNames, err := marshalShoppingList([]entity.Purchase{}, map[uuid.UUID]string{})
-	if err != nil {
-		return uuid.UUID{}, errorWithTransactionRollback(tx, err)
-	}
-
 	createShoppingListQuery := fmt.Sprintf(`
-			INSERT INTO %s (shopping_list_id, type, owner_id, purchases, recipe_names)
-			VALUES ($1, 'shared', $2, $3, $4)
+			INSERT INTO %s (shopping_list_id, type, owner_id)
+			VALUES ($1, 'shared', $2)
 		`, shoppingListsTable)
 
-	if _, err := tx.Exec(createShoppingListQuery, id, userId, bsonPurchases, bsonRecipeNames); err != nil {
+	if _, err := tx.Exec(createShoppingListQuery, id, userId); err != nil {
 		log.Errorf("unable to create shared shopping list for user %s: %s", userId, err)
 		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -93,13 +88,13 @@ func (r *Repository) ensureShoppingListsLimit(tx *sql.Tx, userId uuid.UUID) erro
 			WHERE owner_id=$1
 		`, shoppingListsTable)
 
-	row := tx.QueryRow(getShoppingListsCountQuery)
+	row := tx.QueryRow(getShoppingListsCountQuery, userId)
 	if err := row.Scan(&count); err != nil {
 		log.Errorf("unable to get shopping lists count for user %s: %s", userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 	if count >= r.maxShoppingListsCount {
-		log.Warnf("user %s tries to create new shopping list over maximum count %s", userId, r.maxShoppingListsCount)
+		log.Warnf("user %s tries to create new shopping list over maximum count %d", userId, r.maxShoppingListsCount)
 		return errorWithTransactionRollback(tx, shoppingListFail.GrpcMaxShoppingListsCount(count))
 	}
 
@@ -122,7 +117,7 @@ func (r *Repository) GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingL
 	row := r.db.QueryRow(query, shoppingListId)
 	if err := row.Scan(&shoppingList.Name, &shoppingList.Type, &bsonPurchases, &bsonRecipeNames, &shoppingList.OwnerId,
 		&shoppingList.Version); err != nil {
-		log.Errorf("unable to get shopping list %s: %s", shoppingListId, err)
+		log.Warnf("unable to get shopping list %s: %s", shoppingListId, err)
 		return entity.ShoppingList{}, shoppingListFail.GrpcShoppingListNotFound
 	}
 
@@ -152,7 +147,7 @@ func (r *Repository) GetPersonalShoppingListId(userId uuid.UUID) (uuid.UUID, err
 		`, shoppingListsTable)
 
 	if err := r.db.Get(&id, query, userId); err != nil {
-		log.Errorf("unable to get personal shopping list id for user %s: %s", userId, err)
+		log.Warnf("unable to get personal shopping list id for user %s: %s", userId, err)
 		return uuid.UUID{}, shoppingListFail.GrpcShoppingListNotFound
 	}
 

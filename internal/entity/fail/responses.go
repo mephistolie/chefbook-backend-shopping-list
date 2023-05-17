@@ -9,6 +9,7 @@ var (
 	typeOutdatedVersion       = "outdated_version"
 	typeMaxShoppingListsCount = "max_shopping_lists_count"
 	typePersonalShoppingList  = "personal_shopping_list"
+	typeShoppingListOwner     = "shopping_list_owner"
 )
 
 var (
@@ -16,6 +17,7 @@ var (
 	GrpcShoppingListNotFound   = fail.CreateGrpcClient(fail.TypeNotFound, "shopping list not found")
 	GrpcPersonalShoppingList   = fail.CreateGrpcClient(typePersonalShoppingList, "personal shopping list can't be shared")
 	GrpcInvalidShoppingListKey = fail.CreateGrpcAccessDenied(fail.TypeAccessDenied, "invalid shopping list key")
+	GrpcShoppingListOwner      = fail.CreateGrpcClient(typeShoppingListOwner, "owner can't be deleted from shopping list")
 )
 
 func GrpcMaxShoppingListsCount(count int) error {

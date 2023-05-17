@@ -24,7 +24,7 @@ func (s *Service) GetShoppingListLink(shoppingListId, requesterId uuid.UUID, lin
 	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
 		return "", time.Time{}, err
 	}
-	
+
 	key, expiresAt, err := s.repo.GetShoppingListKey(shoppingListId)
 	if err != nil {
 		return "", time.Time{}, err
@@ -40,10 +40,15 @@ func (s *Service) JoinShoppingList(shoppingListId, userId, key uuid.UUID) error 
 }
 
 func (s *Service) DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error {
-	if userId != requesterId {
-		if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
-			return err
-		}
+	ownerId, err := s.repo.GetShoppingListOwner(shoppingListId)
+	if err != nil {
+		return err
+	}
+	if requesterId != ownerId {
+		return fail.GrpcAccessDenied
+	}
+	if userId == ownerId {
+		return shoppingListFail.GrpcShoppingListOwner
 	}
 	return s.repo.DeleteUserFromShoppingList(userId, shoppingListId)
 }

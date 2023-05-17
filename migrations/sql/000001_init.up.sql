@@ -12,17 +12,17 @@ CREATE TABLE shopping_lists
 
 CREATE TABLE shopping_lists_users
 (
-    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) NOT NULL,
-    user_id          uuid                                              NOT NULL,
+    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) ON DELETE CASCADE NOT NULL,
+    user_id          uuid                                                                NOT NULL,
     name             varchar(64) DEFAULT NULL,
     UNIQUE (shopping_list_id, user_id)
 );
 
 CREATE TABLE keys
 (
-    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) NOT NULL UNIQUE,
-    key              uuid                                              NOT NULL DEFAULT gen_random_uuid(),
-    expires_at       TIMESTAMP WITH TIME ZONE                          NOT NULL
+    shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) ON DELETE CASCADE NOT NULL UNIQUE,
+    key              uuid                                                                NOT NULL DEFAULT gen_random_uuid(),
+    expires_at       TIMESTAMP WITH TIME ZONE                                            NOT NULL
 );
 
 CREATE TABLE inbox

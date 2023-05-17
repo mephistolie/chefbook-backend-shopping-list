@@ -123,7 +123,7 @@ func (s *ShoppingListServer) DeleteSharedShoppingList(_ context.Context, req *ap
 		return nil, fail.GrpcInvalidBody
 	}
 	shoppingListId, err := uuid.Parse(req.ShoppingListId)
-	if err == nil {
+	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
+	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 	"time"
 )
 
@@ -16,12 +17,12 @@ func (r *Repository) GetShoppingListOwner(shoppingListId uuid.UUID) (uuid.UUID, 
 			SELECT owner_id
 			FROM %s
 			WHERE shopping_list_id=$1
-		`, usersTable)
+		`, shoppingListsTable)
 
 	err := r.db.Get(&ownerId, query, shoppingListId)
 	if err != nil {
-		log.Errorf("unable to get shopping list %s owner: %s", shoppingListId, err)
-		return uuid.UUID{}, fail.GrpcUnknown
+		log.Warnf("unable to get shopping list %s owner: %s", shoppingListId, err)
+		return uuid.UUID{}, shoppingListFail.GrpcShoppingListNotFound
 	}
 
 	return ownerId, nil
@@ -33,7 +34,7 @@ func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID
 	query := fmt.Sprintf(`
 			SELECT user_id
 			FROM %s
-			WHERE shopping_list_id=$1 and accepted=true
+			WHERE shopping_list_id=$1
 		`, usersTable)
 
 	rows, err := r.db.Query(query, shoppingListId)
@@ -64,15 +65,21 @@ func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, ti
 	var expiresAt time.Time
 
 	createKeyQuery := fmt.Sprintf(`
-			INSERT INTO %[1]v (shopping_list_id, expires_at)
-			VALUES ($1, $2)
-			WHERE NOT EXISTS
-				(
-					SELECT key, expires_at
-					FROM %[1]v
-					WHERE shopping_list_id=$1
-				)
-			RETURNING key, expires_at
+			WITH s AS
+			(
+				SELECT key, expires_at
+				FROM %[1]v
+				WHERE shopping_list_id=$1
+			), i AS
+			(
+				INSERT INTO %[1]v (shopping_list_id, expires_at)
+				SELECT $1, $2
+				WHERE NOT EXISTS (SELECT 1 FROM s)
+				RETURNING key, expires_at
+			)
+			SELECT key, expires_at FROM i
+			UNION ALL
+			SELECT key, expires_at FROM s
 		`, keysTable)
 
 	row := tx.QueryRow(createKeyQuery, shoppingListId, time.Now().Add(r.keyTtl))
@@ -81,6 +88,7 @@ func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, ti
 		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 	if expiresAt.Unix() < time.Now().Unix() {
+		log.Debugf("key for shopping list %s is outdated; updating...", shoppingListId.String())
 		return r.updateShoppingListKey(tx, shoppingListId)
 	}
 
@@ -97,8 +105,8 @@ func (r *Repository) GetShoppingListType(shoppingListId uuid.UUID) (string, erro
 		`, shoppingListsTable)
 
 	if err := r.db.Get(&shoppingListType, query, shoppingListId); err != nil {
-		log.Errorf("unable to get shopping list %s type: %s", shoppingListId, err)
-		return "", fail.GrpcUnknown
+		log.Warnf("unable to get shopping list %s type: %s", shoppingListId, err)
+		return "", shoppingListFail.GrpcShoppingListNotFound
 	}
 	return shoppingListType, nil
 }
@@ -162,7 +170,7 @@ func (r *Repository) DeleteUserFromShoppingList(userId, shoppingListId uuid.UUID
 			WHERE shopping_list_id=$1 AND user_id=$2
 		`, usersTable)
 
-	if _, err := r.db.Exec(query, shoppingListId); err != nil {
+	if _, err := r.db.Exec(query, shoppingListId, userId); err != nil {
 		log.Errorf("unable to delete connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
 		return fail.GrpcUnknown
 	}

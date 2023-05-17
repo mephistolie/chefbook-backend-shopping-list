@@ -2,6 +2,7 @@ package shopping_list
 
 import (
 	"github.com/google/uuid"
+	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 )
@@ -117,30 +118,39 @@ func concatenateShoppingLists(
 	for _, newPurchase := range newPurchases {
 		id := newPurchase.Id
 		name := newPurchase.Name
-		amount := newPurchase.Amount
 		multiplier := newPurchase.Multiplier
+		amount := newPurchase.Amount
 
 		oldPurchase := oldPurchasesByIds[id]
 		if oldPurchase == nil {
 			oldPurchase = oldPurchasesByName[name]
-			if oldPurchase == nil {
+			if oldPurchase == nil || !isSamePurchase(*oldPurchase, newPurchase) {
 				purchases = append(purchases, newPurchase)
+				log.Debugf("purchase %s not found in shopping list; adding..", newPurchase.Id)
+				continue
 			}
 		}
+		log.Debugf("found existing purchase %s on add purchase to shopping list...", oldPurchase.Id)
 
-		if amount != nil && *amount > 0 {
-			totalAmount := *amount
-			if oldPurchase.Amount != nil {
-				totalAmount += *oldPurchase.Amount
-			}
-			oldPurchase.Amount = &totalAmount
-		}
 		if multiplier != nil && *multiplier > 0 {
+			log.Debugf("sum multipliers for purchase %s...", oldPurchase.Id)
 			totalMultiplier := *multiplier
+			log.Debugf("new multiplier for purchase %s is %s", oldPurchase.Id, totalMultiplier)
 			if oldPurchase.Multiplier != nil {
+				log.Debugf("old multiplier for purchase %s is %s", oldPurchase.Id, *oldPurchase.Multiplier)
 				totalMultiplier += *oldPurchase.Multiplier
 			}
-			oldPurchase.Amount = &totalMultiplier
+			(*oldPurchase).Multiplier = &totalMultiplier
+		}
+		if amount != nil && *amount > 0 {
+			log.Debugf("sum amounts for purchase %s...", oldPurchase.Id)
+			totalAmount := *amount
+			log.Debugf("new amount for purchase %s is %s", oldPurchase.Id, totalAmount)
+			if oldPurchase.Amount != nil {
+				log.Debugf("old amount for purchase %s is %s", oldPurchase.Id, *oldPurchase.Amount)
+				totalAmount += *oldPurchase.Amount
+			}
+			(*oldPurchase).Amount = &totalAmount
 		}
 	}
 
@@ -149,6 +159,32 @@ func concatenateShoppingLists(
 	}
 
 	return purchases, recipeNames
+}
+
+func isSamePurchase(first, second entity.Purchase) bool {
+	firstMeasureUnit, secondMeasureUnit := "", ""
+	if first.MeasureUnit != nil {
+		firstMeasureUnit = *first.MeasureUnit
+	}
+	if second.MeasureUnit != nil {
+		secondMeasureUnit = *second.MeasureUnit
+	}
+	if firstMeasureUnit != secondMeasureUnit {
+		return false
+	}
+
+	firstRecipeId, secondRecipeId := "", ""
+	if first.RecipeId != nil {
+		firstRecipeId = first.RecipeId.String()
+	}
+	if second.RecipeId != nil {
+		secondRecipeId = second.RecipeId.String()
+	}
+	if firstRecipeId != secondRecipeId {
+		return false
+	}
+
+	return true
 }
 
 func (s *Service) DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid.UUID) error {
