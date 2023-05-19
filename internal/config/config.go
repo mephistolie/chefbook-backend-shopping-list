@@ -20,8 +20,6 @@ type Config struct {
 	Firebase Firebase
 	Database Database
 	Amqp     Amqp
-
-	AuthService AuthService
 }
 
 type ShoppingList struct {
@@ -50,10 +48,6 @@ type Amqp struct {
 	VHost    *string
 }
 
-type AuthService struct {
-	Addr *string
-}
-
 func (c Config) Validate() error {
 	if *c.Environment != EnvProd {
 		*c.Environment = EnvDev
@@ -74,11 +68,9 @@ func (c Config) Print() {
 		"MQ host: %v\n"+
 		"MQ port: %v\n"+
 		"MQ vhost: %v\n\n"+
-		"Auth Service Address: %v\n",
 		*c.Environment, *c.Port, *c.LogsPath,
 		*c.ShoppingList.MaxShoppingListsCount, *c.ShoppingList.CheckSubscription,
 		*c.Database.Host, *c.Database.Port, *c.Database.DBName,
 		*c.Amqp.Host, *c.Amqp.Port, *c.Amqp.VHost,
-		*c.AuthService.Addr,
 	)
 }

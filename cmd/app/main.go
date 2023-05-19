@@ -41,10 +41,6 @@ func main() {
 			Password: fs.String("amqp-password", "guest", "message broker user password"),
 			VHost:    fs.String("amqp-vhost", "", "message broker virtual host"),
 		},
-
-		AuthService: config.AuthService{
-			Addr: fs.String("auth-addr", "", "auth service address"),
-		},
 	}
 	if err := ff.Parse(fs, os.Args[1:], ff.WithEnvVars()); err != nil {
 		panic(err)
