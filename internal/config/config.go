@@ -56,7 +56,7 @@ func (c Config) Validate() error {
 }
 
 func (c Config) Print() {
-	log.Infof("SERVICE CONFIGURATION\n"+
+	log.Infof("SHOPPING LIST SERVICE CONFIGURATION\n"+
 		"Environment: %v\n"+
 		"Port: %v\n"+
 		"Logs path: %v\n\n"+
@@ -67,7 +67,7 @@ func (c Config) Print() {
 		"Database name: %v\n\n"+
 		"MQ host: %v\n"+
 		"MQ port: %v\n"+
-		"MQ vhost: %v\n\n"+
+		"MQ vhost: %v\n\n",
 		*c.Environment, *c.Port, *c.LogsPath,
 		*c.ShoppingList.MaxShoppingListsCount, *c.ShoppingList.CheckSubscription,
 		*c.Database.Host, *c.Database.Port, *c.Database.DBName,
