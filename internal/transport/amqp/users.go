@@ -49,5 +49,5 @@ func (s *Server) handleProfileDeletedMsg(messageId uuid.UUID, data []byte) error
 	}
 
 	log.Infof("deleting user %s...", body.UserId)
-	return s.service.DeletePersonalShoppingList(userId, messageId)
+	return s.service.DeleteUserShoppingLists(userId, messageId)
 }

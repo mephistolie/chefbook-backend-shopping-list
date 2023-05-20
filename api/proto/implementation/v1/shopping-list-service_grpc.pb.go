@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.21.12
-// source: v1/service.proto
+// source: v1/shopping-list-service.proto
 
 package v1
 
@@ -475,5 +475,5 @@ var ShoppingListService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1/service.proto",
+	Metadata: "v1/shopping-list-service.proto",
 }

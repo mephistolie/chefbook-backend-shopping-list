@@ -67,7 +67,7 @@ func (r *Repository) ImportFirebaseShoppingList(shoppingListId uuid.UUID, purcha
 	return commitTransaction(tx)
 }
 
-func (r *Repository) DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
+func (r *Repository) DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error {
 	tx, err := r.handleMessageIdempotently(messageId)
 	if err != nil {
 		if isUniqueViolationError(err) {
@@ -79,7 +79,7 @@ func (r *Repository) DeletePersonalShoppingList(userId uuid.UUID, messageId uuid
 
 	query := fmt.Sprintf(`
 			DELETE FROM %s
-			WHERE type='personal' AND user_id=$1
+			WHERE owner_id=$1
 		`, shoppingListsTable)
 
 	if _, err := tx.Exec(query, userId); err != nil {

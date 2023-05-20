@@ -9,7 +9,7 @@ import (
 type ShoppingList interface {
 	CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
 	ImportFirebaseShoppingList(shoppingListId uuid.UUID, purchases []entity.Purchase, messageId uuid.UUID) error
-	DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
+	DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error
 
 	GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error)
 	SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error

@@ -35,7 +35,7 @@ type ShoppingList interface {
 type MQ interface {
 	CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
 	ImportFirebaseShoppingList(userId uuid.UUID, firebaseId string, messageId uuid.UUID) error
-	DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
+	DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error
 }
 
 func New(

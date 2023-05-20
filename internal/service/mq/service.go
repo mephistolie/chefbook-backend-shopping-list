@@ -57,6 +57,6 @@ func (s *Service) ImportFirebaseShoppingList(userId uuid.UUID, firebaseId string
 	return s.repo.ImportFirebaseShoppingList(shoppingListId, purchases, messageId)
 }
 
-func (s *Service) DeletePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
-	return s.repo.DeletePersonalShoppingList(userId, messageId)
+func (s *Service) DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error {
+	return s.repo.DeleteUserShoppingLists(userId, messageId)
 }
