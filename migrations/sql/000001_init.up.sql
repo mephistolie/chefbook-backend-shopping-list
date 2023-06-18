@@ -10,6 +10,8 @@ CREATE TABLE shopping_lists
     version          integer            NOT NULL        DEFAULT 1 CHECK (version > 0)
 );
 
+CREATE INDEX shopping_lists_owner_id_key ON shopping_lists (owner_id);
+
 CREATE TABLE shopping_lists_users
 (
     shopping_list_id uuid REFERENCES shopping_lists (shopping_list_id) ON DELETE CASCADE NOT NULL,
@@ -17,6 +19,8 @@ CREATE TABLE shopping_lists_users
     name             varchar(64) DEFAULT NULL,
     UNIQUE (shopping_list_id, user_id)
 );
+
+CREATE INDEX shopping_lists_users_user_id_key ON shopping_lists_users (user_id);
 
 CREATE TABLE keys
 (
