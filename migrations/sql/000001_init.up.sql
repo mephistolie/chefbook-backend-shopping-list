@@ -6,7 +6,6 @@ CREATE TABLE shopping_lists
     type             shopping_list_type NOT NULL        DEFAULT 'personal',
     owner_id         uuid               NOT NULL,
     purchases        jsonb              NOT NULL        DEFAULT '[]'::jsonb,
-    recipe_names     jsonb              NOT NULL        DEFAULT '{}'::jsonb,
     version          integer            NOT NULL        DEFAULT 1 CHECK (version > 0)
 );
 

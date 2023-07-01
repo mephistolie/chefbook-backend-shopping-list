@@ -28,8 +28,10 @@ func (s *ShoppingListServer) CreateSharedShoppingList(_ context.Context, req *ap
 		return nil, fail.GrpcInvalidBody
 	}
 	var shoppingListId *uuid.UUID = nil
-	if id, err := uuid.Parse(req.ShoppingListId); err == nil {
-		shoppingListId = &id
+	if req.ShoppingListId != nil {
+		if id, err := uuid.Parse(*req.ShoppingListId); err == nil {
+			shoppingListId = &id
+		}
 	}
 	var name *string = nil
 	if len(req.Name) > 0 {

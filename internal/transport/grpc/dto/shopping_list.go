@@ -17,16 +17,6 @@ func BindSetShoppingListRequest(req *api.SetShoppingListRequest) (entity.Shoppin
 		shoppingListIdPtr = &shoppingListId
 	}
 
-	purchases, recipeIds := parsePurchases(req.Purchases)
-	recipeNames := parseRecipeNames(req.RecipeNames, recipeIds)
-	for i := range purchases {
-		if purchases[i].RecipeId != nil {
-			if _, ok := recipeNames[*purchases[i].RecipeId]; !ok {
-				purchases[i].RecipeId = nil
-			}
-		}
-	}
-
 	var lastVersion *int32 = nil
 	if req.LastVersion > 0 {
 		lastVersion = &req.LastVersion
@@ -35,20 +25,9 @@ func BindSetShoppingListRequest(req *api.SetShoppingListRequest) (entity.Shoppin
 	return entity.ShoppingListInput{
 		ShoppingListId: shoppingListIdPtr,
 		EditorId:       editorId,
-		Purchases:      purchases,
-		RecipeNames:    recipeNames,
+		Purchases:      parsePurchases(req.Purchases),
 		LastVersion:    lastVersion,
 	}, nil
-}
-
-func parseRecipeNames(request map[string]string, usedIds []uuid.UUID) map[uuid.UUID]string {
-	names := map[uuid.UUID]string{}
-	for _, id := range usedIds {
-		if name, ok := request[id.String()]; ok {
-			names[id] = name
-		}
-	}
-	return names
 }
 
 func NewShoppingListsResponse(shoppingLists []entity.ShoppingListInfo) []*api.ShoppingListInfo {
@@ -72,41 +51,22 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 
 	purchases := make([]*api.Purchase, len(shoppingList.Purchases))
 	for i, purchase := range shoppingList.Purchases {
-		multiplier := 0
-		if purchase.Multiplier != nil && *purchase.Multiplier > 0 {
-			multiplier = *purchase.Multiplier
-		}
-
-		amount := 0
-		if purchase.Amount != nil && *purchase.Amount > 0 {
-			amount = *purchase.Amount
-		}
-
-		measureUnit := ""
-		if purchase.MeasureUnit != nil {
-			measureUnit = *purchase.MeasureUnit
-		}
-
-		recipeId := ""
+		var recipeIdPtr *string
 		if purchase.RecipeId != nil {
-			recipeId = purchase.RecipeId.String()
+			recipeId := purchase.RecipeId.String()
+			recipeIdPtr = &recipeId
 		}
 
 		rawPurchase := api.Purchase{
 			Id:          purchase.Id.String(),
 			Name:        purchase.Name,
-			Multiplier:  int32(multiplier),
+			Multiplier:  purchase.Multiplier,
 			Purchased:   purchase.Purchased,
-			Amount:      int32(amount),
-			MeasureUnit: measureUnit,
-			RecipeId:    recipeId,
+			Amount:      purchase.Amount,
+			MeasureUnit: purchase.MeasureUnit,
+			RecipeId:    recipeIdPtr,
 		}
 		purchases[i] = &rawPurchase
-	}
-
-	recipeNames := map[string]string{}
-	for id, name := range shoppingList.RecipeNames {
-		recipeNames[id.String()] = name
 	}
 
 	return &api.GetShoppingListResponse{
@@ -115,7 +75,7 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 		Type:        string(shoppingList.Type),
 		OwnerId:     shoppingList.OwnerId.String(),
 		Purchases:   purchases,
-		RecipeNames: recipeNames,
+		RecipeNames: shoppingList.RecipeNames,
 		Version:     shoppingList.Version,
 	}
 }

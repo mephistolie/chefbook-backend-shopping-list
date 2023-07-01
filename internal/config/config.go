@@ -17,6 +17,8 @@ type Config struct {
 
 	ShoppingList ShoppingList
 
+	RecipeService RecipeService
+
 	Firebase Firebase
 	Database Database
 	Amqp     Amqp
@@ -26,6 +28,10 @@ type ShoppingList struct {
 	MaxShoppingListsCount *int
 	KeyTtl                *time.Duration
 	CheckSubscription     *bool
+}
+
+type RecipeService struct {
+	Addr *string
 }
 
 type Firebase struct {
@@ -62,6 +68,7 @@ func (c Config) Print() {
 		"Logs path: %v\n\n"+
 		"Max shopping lists count: %v\n"+
 		"Check subscription: %v\n\n"+
+		"Recipe service: %v\n\n"+
 		"Database host: %v\n"+
 		"Database port: %v\n"+
 		"Database name: %v\n\n"+
@@ -70,6 +77,7 @@ func (c Config) Print() {
 		"MQ vhost: %v\n\n",
 		*c.Environment, *c.Port, *c.LogsPath,
 		*c.ShoppingList.MaxShoppingListsCount, *c.ShoppingList.CheckSubscription,
+		*c.RecipeService.Addr,
 		*c.Database.Host, *c.Database.Port, *c.Database.DBName,
 		*c.Amqp.Host, *c.Amqp.Port, *c.Amqp.VHost,
 	)

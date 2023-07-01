@@ -536,6 +536,8 @@ github.com/mattn/go-shellwords v1.0.12 h1:M2zGm7EW6UQJvDeQxo4T51eKPurbeFbe8WtebG
 github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 h1:I0XW9+e1XWDxdcEniV4rQAIOPUGDq67JSCiRCgGCZLI=
 github.com/maxbrunsfeld/counterfeiter/v6 v6.2.2 h1:g+4J5sZg6osfvEfkRZxJ1em0VT95/UOZgi/l7zi1/oE=
 github.com/mephistolie/chefbook-backend-auth/api v1.0.0/go.mod h1:r6ZBfZg8xZ1WtnZYxrZ3zSjoA0YmTQkee99nDbq5pP4=
+github.com/mephistolie/chefbook-backend-category/api v1.1.0 h1:lS2Llk5Xl1Y1RuZmc6fYMQTtvbhR3bNGjhmknrw4bCw=
+github.com/mephistolie/chefbook-backend-common/utils v0.10.1 h1:1qD344n6yHPAluM0QzPbcHygWKHSixHQb7Ihvr1UGd8=
 github.com/miekg/dns v1.0.14 h1:9jZdLNd/P4+SfEJ0TNyxYpsK8N4GtfylBLqtbYN1sbA=
 github.com/miekg/pkcs11 v1.0.3 h1:iMwmD7I5225wv84WxIG/bmxz9AXjWvTWIbM/TYHvWtw=
 github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 h1:AMFGa4R4MiIpspGNG7Z948v4n35fFGB3RR3G/ry4FWs=

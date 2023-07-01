@@ -41,6 +41,12 @@ secrets:
     userRef: user
     passwordRef: password
 
+services:
+  recipe:
+    name: chefbook-backend-recipe-service
+    namespace: ""
+    port: 8080
+
 service:
   type: ClusterIP
   port: 8080

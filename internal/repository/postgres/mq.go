@@ -54,12 +54,12 @@ func (r *Repository) ImportFirebaseShoppingList(shoppingListId uuid.UUID, purcha
 		}
 	}
 
-	query, bsonShoppingList, bsonRecipeNames, err := getSetShoppingListBaseQuery(purchases, entity.RecipeNames{})
+	query, bsonShoppingList, err := getSetShoppingListBaseQuery(purchases)
 	if err != nil {
 		return errorWithTransactionRollback(tx, err)
 	}
 
-	if _, err = tx.Exec(query, bsonShoppingList, bsonRecipeNames, shoppingListId); err != nil {
+	if _, err = tx.Exec(query, bsonShoppingList, shoppingListId); err != nil {
 		log.Errorf("unable to set shopping list %s: %s", shoppingListId, err)
 		return errorWithTransactionRollback(tx, shoppingListFail.GrpcShoppingListNotFound)
 	}

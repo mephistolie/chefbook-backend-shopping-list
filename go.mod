@@ -6,13 +6,16 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/mephistolie/chefbook-backend-auth/api v1.3.1
-	github.com/mephistolie/chefbook-backend-common/firebase v0.6.0
+	github.com/mephistolie/chefbook-backend-auth/api v1.6.0
+	github.com/mephistolie/chefbook-backend-common/firebase v0.9.0
 	github.com/mephistolie/chefbook-backend-common/log v0.6.0
 	github.com/mephistolie/chefbook-backend-common/migrate/sql v0.6.0
 	github.com/mephistolie/chefbook-backend-common/responses v0.9.0
 	github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0
 	github.com/mephistolie/chefbook-backend-common/subscription v0.8.0
+	github.com/mephistolie/chefbook-backend-common/utils v0.10.1
+	github.com/mephistolie/chefbook-backend-recipe/api v1.1.3
+	github.com/mephistolie/chefbook-backend-shopping-list/api/v2 v2.1.8
 	github.com/peterbourgon/ff/v3 v3.3.0
 	github.com/wagslane/go-rabbitmq v0.12.3
 	google.golang.org/grpc v1.54.0

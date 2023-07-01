@@ -22,6 +22,10 @@ func main() {
 			CheckSubscription:     fs.Bool("check-subscription", true, "enable free subscription limits"),
 		},
 
+		RecipeService: config.RecipeService{
+			Addr: fs.String("recipe-addr", "", "recipe service address"),
+		},
+
 		Firebase: config.Firebase{
 			Credentials: fs.String("firebase-credentials", "", "Firebase credentials JSON; leave empty to disable"),
 		},

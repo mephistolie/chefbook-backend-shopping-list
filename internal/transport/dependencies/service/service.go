@@ -6,6 +6,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/grpc"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/dependencies/repository"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/mq"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/service/shopping_list"
@@ -41,6 +42,7 @@ type MQ interface {
 func New(
 	cfg *config.Config,
 	repo repository.ShoppingList,
+	grpc *grpc.Repository,
 ) (*Service, error) {
 	var err error = nil
 	var client *firebase.Client = nil
@@ -54,7 +56,7 @@ func New(
 	}
 
 	return &Service{
-		ShoppingList: shopping_list.NewService(repo),
+		ShoppingList: shopping_list.NewService(repo, grpc),
 		MQ:           mq.NewService(repo, client),
 	}, nil
 }

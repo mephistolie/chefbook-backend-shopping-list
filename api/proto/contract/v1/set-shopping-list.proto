@@ -9,7 +9,6 @@ message SetShoppingListRequest {
   string editorId = 1;
   string shoppingListId = 2;
   repeated Purchase purchases = 3;
-  map<string, string> recipeNames = 4;
   int32 lastVersion = 5;
 }
 

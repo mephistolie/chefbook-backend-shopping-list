@@ -1,10 +1,14 @@
 package shopping_list
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/log"
+	"github.com/mephistolie/chefbook-backend-common/utils/slices"
+	api "github.com/mephistolie/chefbook-backend-recipe/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
+	"time"
 )
 
 func (s *Service) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
@@ -31,6 +35,8 @@ func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (
 		}
 	}
 
+	shoppingList.RecipeNames = s.getRecipeNames(shoppingList.Purchases, userId)
+
 	return shoppingList, nil
 }
 
@@ -39,7 +45,15 @@ func (s *Service) getPersonalShoppingList(userId uuid.UUID) (entity.ShoppingList
 	if err != nil {
 		return entity.ShoppingList{}, err
 	}
-	return s.repo.GetShoppingList(id)
+
+	shoppingList, err := s.repo.GetShoppingList(id)
+	if err != nil {
+		return entity.ShoppingList{}, err
+	}
+
+	shoppingList.RecipeNames = s.getRecipeNames(shoppingList.Purchases, userId)
+
+	return shoppingList, nil
 }
 
 func (s *Service) SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error {
@@ -85,12 +99,11 @@ func (s *Service) AddPurchasesToShoppingList(input entity.ShoppingListInput) (in
 		return 0, shoppingListFail.GrpcOutdatedVersion
 	}
 
-	purchases, recipeNames := concatenateShoppingLists(shoppingList.Purchases, input.Purchases, shoppingList.RecipeNames, input.RecipeNames)
+	purchases := concatenateShoppingLists(shoppingList.Purchases, input.Purchases)
 	concatenatedInput := entity.ShoppingListInput{
 		ShoppingListId: input.ShoppingListId,
 		EditorId:       input.EditorId,
 		Purchases:      purchases,
-		RecipeNames:    recipeNames,
 		LastVersion:    input.LastVersion,
 	}
 
@@ -100,11 +113,8 @@ func (s *Service) AddPurchasesToShoppingList(input entity.ShoppingListInput) (in
 func concatenateShoppingLists(
 	oldPurchases []entity.Purchase,
 	newPurchases []entity.Purchase,
-	oldRecipeNames entity.RecipeNames,
-	newRecipeNames entity.RecipeNames,
-) ([]entity.Purchase, entity.RecipeNames) {
+) []entity.Purchase {
 	var purchases []entity.Purchase
-	recipeNames := oldRecipeNames
 
 	oldPurchasesByIds := make(map[uuid.UUID]*entity.Purchase)
 	oldPurchasesByName := make(map[string]*entity.Purchase)
@@ -154,11 +164,7 @@ func concatenateShoppingLists(
 		}
 	}
 
-	for recipeId, recipeName := range newRecipeNames {
-		recipeNames[recipeId] = recipeName
-	}
-
-	return purchases, recipeNames
+	return purchases
 }
 
 func isSamePurchase(first, second entity.Purchase) bool {
@@ -192,4 +198,29 @@ func (s *Service) DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid
 		return err
 	}
 	return s.repo.DeleteSharedShoppingList(shoppingListId)
+}
+
+func (s *Service) getRecipeNames(purchases []entity.Purchase, userId uuid.UUID) map[string]string {
+
+	var recipeIds []string
+	for _, purchase := range purchases {
+		if purchase.RecipeId != nil {
+			recipeIds = append(recipeIds, purchase.RecipeId.String())
+		}
+	}
+	recipeIds = slices.RemoveDuplicates(recipeIds)
+
+	ctx, cancelCtx := context.WithTimeout(context.Background(), 3*time.Second)
+	res, err := s.grpc.Recipe.GetRecipeNames(ctx, &api.GetRecipeNamesRequest{
+		RecipeIds: recipeIds,
+		UserId:    userId.String(),
+	})
+	cancelCtx()
+
+	if err != nil {
+		log.Debugf("unable to get recipe names: %s", err)
+		return map[string]string{}
+	}
+	log.Debugf("got recipe names: %s", res.RecipeNames)
+	return res.RecipeNames
 }

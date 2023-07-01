@@ -49,6 +49,11 @@ spec:
             - name: CHECK_SUBSCRIPTION
               value: {{ .Values.config.checkSubscription | quote }}
 
+            # Recipe Microservice
+
+            - name: RECIPE_ADDR
+              value: "{{ .Values.services.recipe.name }}.{{ .Values.services.recipe.namespace | default .Release.Namespace }}.svc.cluster.local:{{ .Values.services.recipe.port }}"
+
             # Firebase
 
             - name: FIREBASE_CREDENTIALS

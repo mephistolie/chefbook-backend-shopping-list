@@ -7,6 +7,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/shutdown"
 	shoppinglistpb "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/config"
+	remoteServices "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/grpc"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/amqp"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/dependencies/service"
@@ -29,8 +30,13 @@ func Run(cfg *config.Config) {
 	}
 
 	repository := postgres.NewRepository(db, cfg.ShoppingList)
+	grpcServices, err := remoteServices.NewRepository(cfg)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-	shoppingListService, err := service.New(cfg, repository)
+	shoppingListService, err := service.New(cfg, repository, grpcServices)
 	if err != nil {
 		log.Fatal(err)
 		return

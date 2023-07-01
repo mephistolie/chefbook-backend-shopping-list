@@ -5,11 +5,9 @@ import "github.com/google/uuid"
 type Purchase struct {
 	Id          uuid.UUID
 	Name        string
-	Multiplier  *int
+	Multiplier  *int32
 	Purchased   bool
-	Amount      *int
+	Amount      *int32
 	MeasureUnit *string
 	RecipeId    *uuid.UUID
 }
-
-type RecipeNames map[uuid.UUID]string

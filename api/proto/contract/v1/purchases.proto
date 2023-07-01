@@ -6,10 +6,10 @@ option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/p
 message Purchase {
   string id = 1;
   string name = 2;
-  int32 multiplier = 3;
+  optional int32 multiplier = 3;
   bool purchased = 4;
-  int32 amount = 5;
-  string measureUnit = 6;
-  string recipeId = 7;
+  optional int32 amount = 5;
+  optional string measureUnit = 6;
+  optional string recipeId = 7;
 }
 
