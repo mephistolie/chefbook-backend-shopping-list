@@ -22,7 +22,11 @@ func main() {
 			CheckSubscription:     fs.Bool("check-subscription", true, "enable free subscription limits"),
 		},
 
-		RecipeService: config.RecipeService{
+		ProfileService: config.Service{
+			Addr: fs.String("profile-addr", "", "profile service address"),
+		},
+
+		RecipeService: config.Service{
 			Addr: fs.String("recipe-addr", "", "recipe service address"),
 		},
 
