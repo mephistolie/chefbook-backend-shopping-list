@@ -14,6 +14,7 @@ type ShoppingListInfo struct {
 	Name    *string
 	Type    ShoppingListType
 	OwnerId uuid.UUID
+	Version int32
 }
 
 type ShoppingList struct {

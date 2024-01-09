@@ -13,7 +13,7 @@ message GetShoppingListRequest {
 
 message GetShoppingListResponse {
   string id = 1;
-  string name = 2;
+  optional string name = 2;
   string type = 3;
   string ownerId = 4;
   repeated Purchase purchases = 5;

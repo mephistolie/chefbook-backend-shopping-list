@@ -35,8 +35,10 @@ func NewShoppingListsResponse(shoppingLists []entity.ShoppingListInfo) []*api.Sh
 	for i, shoppingList := range shoppingLists {
 		rawShoppingList := api.ShoppingListInfo{
 			Id:      shoppingList.Id.String(),
+			Name:    shoppingList.Name,
 			Type:    string(shoppingList.Type),
 			OwnerId: shoppingList.OwnerId.String(),
+			Version: shoppingList.Version,
 		}
 		response[i] = &rawShoppingList
 	}
@@ -44,11 +46,6 @@ func NewShoppingListsResponse(shoppingLists []entity.ShoppingListInfo) []*api.Sh
 }
 
 func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppingListResponse {
-	name := ""
-	if shoppingList.Name != nil {
-		name = *shoppingList.Name
-	}
-
 	purchases := make([]*api.Purchase, len(shoppingList.Purchases))
 	for i, purchase := range shoppingList.Purchases {
 		var recipeIdPtr *string
@@ -71,7 +68,7 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 
 	return &api.GetShoppingListResponse{
 		Id:          shoppingList.Id.String(),
-		Name:        name,
+		Name:        shoppingList.Name,
 		Type:        string(shoppingList.Type),
 		OwnerId:     shoppingList.OwnerId.String(),
 		Purchases:   purchases,

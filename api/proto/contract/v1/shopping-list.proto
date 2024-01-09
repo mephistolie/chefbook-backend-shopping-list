@@ -5,7 +5,8 @@ option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/p
 
 message ShoppingListInfo {
   string id = 1;
-  string name = 2;
+  optional string name = 2;
   string type = 3;
   string ownerId = 4;
+  int32 version = 5;
 }

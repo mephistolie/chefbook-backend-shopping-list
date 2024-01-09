@@ -16,7 +16,7 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListIn
 	var shoppingLists []entity.ShoppingListInfo
 
 	query := fmt.Sprintf(`
-			SELECT %[1]v.shopping_list_id, %[1]v.name, %[2]v.type, %[2]v.owner_id
+			SELECT %[1]v.shopping_list_id, %[1]v.name, %[2]v.type, %[2]v.owner_id, %[2]v.version
 			FROM %[1]v
 			LEFT JOIN %[2]v ON %[1]v.shopping_list_id=%[2]v.shopping_list_id
 			WHERE %[1]v.user_id=$1
@@ -30,8 +30,9 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListIn
 
 	for rows.Next() {
 		shoppingList := entity.ShoppingListInfo{}
-		if err = rows.Scan(&shoppingList.Id, &shoppingList.Name, &shoppingList.Type, &shoppingList.OwnerId); err != nil {
-			log.Warnf("unable to parse shopping list info: ", err)
+		if err = rows.Scan(&shoppingList.Id, &shoppingList.Name, &shoppingList.Type, &shoppingList.OwnerId,
+			&shoppingList.Version); err != nil {
+			log.Warn("unable to parse shopping list info: ", err)
 			continue
 		}
 		shoppingLists = append(shoppingLists, shoppingList)
