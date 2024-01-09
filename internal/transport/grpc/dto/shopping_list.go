@@ -34,10 +34,14 @@ func NewShoppingListsResponse(shoppingLists []entity.ShoppingListInfo) []*api.Sh
 	response := make([]*api.ShoppingListInfo, len(shoppingLists))
 	for i, shoppingList := range shoppingLists {
 		rawShoppingList := api.ShoppingListInfo{
-			Id:      shoppingList.Id.String(),
-			Name:    shoppingList.Name,
-			Type:    string(shoppingList.Type),
-			OwnerId: shoppingList.OwnerId.String(),
+			Id:   shoppingList.Id.String(),
+			Name: shoppingList.Name,
+			Type: string(shoppingList.Type),
+			Owner: &api.ShoppingListUser{
+				Id:     shoppingList.Owner.Id.String(),
+				Name:   shoppingList.Owner.Name,
+				Avatar: shoppingList.Owner.Avatar,
+			},
 			Version: shoppingList.Version,
 		}
 		response[i] = &rawShoppingList
@@ -67,10 +71,14 @@ func NewGetShoppingListResponse(shoppingList entity.ShoppingList) *api.GetShoppi
 	}
 
 	return &api.GetShoppingListResponse{
-		Id:          shoppingList.Id.String(),
-		Name:        shoppingList.Name,
-		Type:        string(shoppingList.Type),
-		OwnerId:     shoppingList.OwnerId.String(),
+		Id:   shoppingList.Id.String(),
+		Name: shoppingList.Name,
+		Type: string(shoppingList.Type),
+		Owner: &api.ShoppingListUser{
+			Id:     shoppingList.Owner.Id.String(),
+			Name:   shoppingList.Owner.Name,
+			Avatar: shoppingList.Owner.Avatar,
+		},
 		Purchases:   purchases,
 		RecipeNames: shoppingList.RecipeNames,
 		Version:     shoppingList.Version,

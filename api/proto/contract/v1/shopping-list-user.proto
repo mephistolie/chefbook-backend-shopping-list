@@ -3,12 +3,8 @@ package v1;
 
 option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/proto/v1";
 
-import "v1/shopping-list-user.proto";
-
-message ShoppingListInfo {
+message ShoppingListUser {
   string id = 1;
   optional string name = 2;
-  string type = 3;
-  ShoppingListUser owner = 4;
-  int32 version = 5;
+  optional string avatar = 3;
 }

@@ -30,7 +30,7 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListIn
 
 	for rows.Next() {
 		shoppingList := entity.ShoppingListInfo{}
-		if err = rows.Scan(&shoppingList.Id, &shoppingList.Name, &shoppingList.Type, &shoppingList.OwnerId,
+		if err = rows.Scan(&shoppingList.Id, &shoppingList.Name, &shoppingList.Type, &shoppingList.Owner.Id,
 			&shoppingList.Version); err != nil {
 			log.Warn("unable to parse shopping list info: ", err)
 			continue
@@ -115,7 +115,7 @@ func (r *Repository) GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingL
 		`, shoppingListsTable, usersTable)
 
 	row := r.db.QueryRow(query, shoppingListId)
-	if err := row.Scan(&shoppingList.Name, &shoppingList.Type, &bsonPurchases, &shoppingList.OwnerId,
+	if err := row.Scan(&shoppingList.Name, &shoppingList.Type, &bsonPurchases, &shoppingList.Owner.Id,
 		&shoppingList.Version); err != nil {
 		log.Warnf("unable to get shopping list %s: %s", shoppingListId, err)
 		return entity.ShoppingList{}, shoppingListFail.GrpcShoppingListNotFound

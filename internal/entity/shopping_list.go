@@ -13,7 +13,7 @@ type ShoppingListInfo struct {
 	Id      uuid.UUID
 	Name    *string
 	Type    ShoppingListType
-	OwnerId uuid.UUID
+	Owner   User
 	Version int32
 }
 
@@ -23,7 +23,7 @@ type ShoppingList struct {
 	Purchases   []Purchase
 	RecipeNames map[string]string
 	Type        ShoppingListType
-	OwnerId     uuid.UUID
+	Owner       User
 	Version     int32
 }
 

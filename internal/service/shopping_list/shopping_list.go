@@ -8,11 +8,30 @@ import (
 	api "github.com/mephistolie/chefbook-backend-recipe/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
+	"sync"
 	"time"
 )
 
 func (s *Service) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
-	return s.repo.GetShoppingLists(userId)
+	shoppingLists, err := s.repo.GetShoppingLists(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var rawIds []string
+	for _, shoppingList := range shoppingLists {
+		rawIds = append(rawIds, shoppingList.Owner.Id.String())
+	}
+
+	profiles := s.getProfilesInfo(rawIds)
+	for i := range shoppingLists {
+		if profile, ok := profiles[shoppingLists[i].Owner.Id.String()]; ok {
+			shoppingLists[i].Owner.Name = profile.VisibleName
+			shoppingLists[i].Owner.Avatar = profile.Avatar
+		}
+	}
+
+	return shoppingLists, nil
 }
 
 func (s *Service) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error) {
@@ -29,13 +48,27 @@ func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (
 		return entity.ShoppingList{}, err
 	}
 
-	if userId != shoppingList.OwnerId {
+	if userId != shoppingList.Owner.Id {
 		if err = s.checkUserHasAccessToShoppingList(userId, *shoppingListId, false); err != nil {
 			return entity.ShoppingList{}, err
 		}
 	}
 
-	shoppingList.RecipeNames = s.getRecipeNames(shoppingList.Purchases, userId)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		profiles := s.getProfilesInfo([]string{shoppingList.Owner.Id.String()})
+		if profile, ok := profiles[shoppingList.Owner.Id.String()]; ok {
+			shoppingList.Owner.Name = profile.VisibleName
+			shoppingList.Owner.Avatar = profile.Avatar
+		}
+		wg.Done()
+	}()
+	go func() {
+		shoppingList.RecipeNames = s.getRecipeNames(shoppingList.Purchases, userId)
+		wg.Done()
+	}()
+	wg.Wait()
 
 	return shoppingList, nil
 }
@@ -87,7 +120,7 @@ func (s *Service) AddPurchasesToShoppingList(input entity.ShoppingListInput) (in
 	if input.ShoppingListId == nil {
 		shoppingList, err = s.getPersonalShoppingList(input.EditorId)
 	} else {
-		if shoppingList, err = s.repo.GetShoppingList(*input.ShoppingListId); err == nil && input.EditorId != shoppingList.OwnerId {
+		if shoppingList, err = s.repo.GetShoppingList(*input.ShoppingListId); err == nil && input.EditorId != shoppingList.Owner.Id {
 			err = s.checkUserHasAccessToShoppingList(input.EditorId, *input.ShoppingListId, false)
 		}
 	}

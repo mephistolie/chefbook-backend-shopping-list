@@ -1,11 +1,9 @@
 package shopping_list
 
 import (
-	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
-	api "github.com/mephistolie/chefbook-backend-profile/api/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 	"time"
@@ -26,18 +24,12 @@ func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([
 		rawIds = append(rawIds, id.String())
 	}
 
-	ctx, cancelCtx := context.WithTimeout(context.Background(), 3*time.Second)
-	profiles, err := s.grpc.Profile.GetProfilesMinInfo(ctx, &api.GetProfilesMinInfoRequest{ProfileIds: rawIds})
-	cancelCtx()
-
-	if err != nil {
-		return users, nil
-	}
-
+	profiles := s.getProfilesInfo(rawIds)
 	for i := range users {
-		profile := profiles.Infos[users[i].Id.String()]
-		users[i].Name = profile.VisibleName
-		users[i].Avatar = profile.Avatar
+		if profile, ok := profiles[users[i].Id.String()]; ok {
+			users[i].Name = profile.VisibleName
+			users[i].Avatar = profile.Avatar
+		}
 	}
 
 	return users, nil
