@@ -49,6 +49,11 @@ spec:
             - name: CHECK_SUBSCRIPTION
               value: {{ .Values.config.checkSubscription | quote }}
 
+            # Profile Microservice
+
+            - name: PROFILE_ADDR
+              value: "{{ .Values.services.profile.name }}.{{ .Values.services.recipe.namespace | default .Release.Namespace }}.svc.cluster.local:{{ .Values.services.recipe.port }}"
+
             # Recipe Microservice
 
             - name: RECIPE_ADDR

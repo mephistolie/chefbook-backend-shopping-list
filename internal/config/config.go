@@ -17,7 +17,8 @@ type Config struct {
 
 	ShoppingList ShoppingList
 
-	RecipeService RecipeService
+	ProfileService Service
+	RecipeService  Service
 
 	Firebase Firebase
 	Database Database
@@ -30,7 +31,7 @@ type ShoppingList struct {
 	CheckSubscription     *bool
 }
 
-type RecipeService struct {
+type Service struct {
 	Addr *string
 }
 

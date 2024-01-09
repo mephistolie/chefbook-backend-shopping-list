@@ -6,7 +6,7 @@ option go_package = "github.com/mephistolie/chefbook-backend-shopping-list/api/p
 message SetShoppingListNameRequest {
   string userId = 1;
   string shoppingListId = 2;
-  string name = 3;
+  optional string name = 3;
 }
 
 message SetShoppingListNameResponse {

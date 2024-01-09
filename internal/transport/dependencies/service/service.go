@@ -27,7 +27,7 @@ type ShoppingList interface {
 	AddPurchasesToShoppingList(input entity.ShoppingListInput) (int32, error)
 	DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid.UUID) error
 
-	GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]uuid.UUID, error)
+	GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]entity.User, error)
 	GetShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error)
 	JoinShoppingList(shoppingListId, userId, key uuid.UUID) error
 	DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error

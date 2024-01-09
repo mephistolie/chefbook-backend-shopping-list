@@ -14,6 +14,7 @@ require (
 	github.com/mephistolie/chefbook-backend-common/shutdown v0.6.0
 	github.com/mephistolie/chefbook-backend-common/subscription v0.8.0
 	github.com/mephistolie/chefbook-backend-common/utils v0.10.1
+	github.com/mephistolie/chefbook-backend-profile/api v1.2.3
 	github.com/mephistolie/chefbook-backend-recipe/api v1.1.3
 	github.com/mephistolie/chefbook-backend-shopping-list/api/v2 v2.1.8
 	github.com/peterbourgon/ff/v3 v3.3.0

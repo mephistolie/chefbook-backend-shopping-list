@@ -20,12 +20,12 @@ func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.Ge
 		return nil, fail.GrpcInvalidBody
 	}
 
-	invites, err := s.service.GetShoppingListUsers(shoppingListId, requesterId)
+	users, err := s.service.GetShoppingListUsers(shoppingListId, requesterId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &api.GetShoppingListUsersResponse{Users: dto.NewInvitesResponse(invites)}, nil
+	return &api.GetShoppingListUsersResponse{Users: dto.NewShoppingListUsersResponse(users)}, nil
 }
 
 func (s *ShoppingListServer) GetSharedShoppingListLink(_ context.Context, req *api.GetSharedShoppingListLinkRequest) (*api.GetSharedShoppingListLinkResponse, error) {

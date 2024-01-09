@@ -79,15 +79,12 @@ func (s *ShoppingListServer) SetShoppingListName(_ context.Context, req *api.Set
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
-	var name *string = nil
-	if len(req.Name) > 0 {
-		if len(req.Name) > 64 {
-			return nil, fail.CreateGrpcClient(fail.TypeInvalidBody, "name max length is 64")
-		}
-		name = &req.Name
+	if req.Name != nil && len(*req.Name) > 64 {
+		name := (*req.Name)[0:64]
+		req.Name = &name
 	}
 
-	if err := s.service.SetShoppingListName(shoppingListId, userId, name); err != nil {
+	if err := s.service.SetShoppingListName(shoppingListId, userId, req.Name); err != nil {
 		return nil, err
 	}
 	return &api.SetShoppingListNameResponse{Message: "shopping list name updated"}, nil

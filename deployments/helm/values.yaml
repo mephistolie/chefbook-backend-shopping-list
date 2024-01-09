@@ -42,6 +42,10 @@ secrets:
     passwordRef: password
 
 services:
+  profile:
+    name: chefbook-backend-profile-service
+    namespace: ""
+    port: 8080
   recipe:
     name: chefbook-backend-recipe-service
     namespace: ""
