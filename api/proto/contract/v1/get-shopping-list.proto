@@ -9,7 +9,6 @@ import "v1/shopping-list-user.proto";
 message GetShoppingListRequest {
   string userId = 1;
   string shoppingListId = 2;
-  string key = 3;
 }
 
 message GetShoppingListResponse {
