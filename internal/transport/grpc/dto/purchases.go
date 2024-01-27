@@ -39,7 +39,7 @@ func parsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
 			Name:        rawPurchase.Name,
 			Multiplier:  rawPurchase.Multiplier,
 			Purchased:   rawPurchase.Purchased,
-			Amount:      rawPurchase.Multiplier,
+			Amount:      rawPurchase.Amount,
 			MeasureUnit: rawPurchase.MeasureUnit,
 			RecipeId:    recipeIdPtr,
 		}
