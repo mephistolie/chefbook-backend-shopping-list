@@ -10,7 +10,7 @@ type Purchase struct {
 	Name        string     `json:"name" binding:"required"`
 	Multiplier  *int32     `json:"multiplier,omitempty"`
 	Purchased   bool       `json:"purchased"`
-	Amount      *int32     `json:"amount,omitempty"`
+	Amount      *float32   `json:"amount,omitempty"`
 	MeasureUnit *string    `json:"measureUnit,omitempty"`
 	RecipeId    *uuid.UUID `json:"recipeId,omitempty"`
 }
