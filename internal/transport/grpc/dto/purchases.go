@@ -4,10 +4,12 @@ import (
 	"github.com/google/uuid"
 	api "github.com/mephistolie/chefbook-backend-shopping-list/api/v2/proto/implementation/v1"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
+	"math"
 )
 
 const (
-	maxUnitLength = 10
+	maxAmountCount = 10000
+	maxUnitLength  = 10
 )
 
 func parsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
@@ -20,6 +22,17 @@ func parsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
 		}
 		if len(rawPurchase.Name) == 0 {
 			continue
+		}
+
+		if rawPurchase.Amount != nil {
+			if *rawPurchase.Amount <= 0 {
+				rawPurchase.Amount = nil
+			} else if *rawPurchase.Amount > maxAmountCount {
+				*rawPurchase.Amount = maxAmountCount
+			}
+		}
+		if rawPurchase.Amount != nil {
+			*rawPurchase.Amount = float32(math.Round(float64(*rawPurchase.Amount)*1000) / 1000)
 		}
 
 		if rawPurchase.MeasureUnit != nil && len(*rawPurchase.MeasureUnit) > maxUnitLength {

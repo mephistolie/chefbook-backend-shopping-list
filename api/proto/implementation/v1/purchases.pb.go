@@ -25,13 +25,13 @@ type Purchase struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name        string  `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Multiplier  *int32  `protobuf:"varint,3,opt,name=multiplier,proto3,oneof" json:"multiplier,omitempty"`
-	Purchased   bool    `protobuf:"varint,4,opt,name=purchased,proto3" json:"purchased,omitempty"`
-	Amount      *int32  `protobuf:"varint,5,opt,name=amount,proto3,oneof" json:"amount,omitempty"`
-	MeasureUnit *string `protobuf:"bytes,6,opt,name=measureUnit,proto3,oneof" json:"measureUnit,omitempty"`
-	RecipeId    *string `protobuf:"bytes,7,opt,name=recipeId,proto3,oneof" json:"recipeId,omitempty"`
+	Id          string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name        string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Multiplier  *int32   `protobuf:"varint,3,opt,name=multiplier,proto3,oneof" json:"multiplier,omitempty"`
+	Purchased   bool     `protobuf:"varint,4,opt,name=purchased,proto3" json:"purchased,omitempty"`
+	Amount      *float32 `protobuf:"fixed32,5,opt,name=amount,proto3,oneof" json:"amount,omitempty"`
+	MeasureUnit *string  `protobuf:"bytes,6,opt,name=measureUnit,proto3,oneof" json:"measureUnit,omitempty"`
+	RecipeId    *string  `protobuf:"bytes,7,opt,name=recipeId,proto3,oneof" json:"recipeId,omitempty"`
 }
 
 func (x *Purchase) Reset() {
@@ -94,7 +94,7 @@ func (x *Purchase) GetPurchased() bool {
 	return false
 }
 
-func (x *Purchase) GetAmount() int32 {
+func (x *Purchase) GetAmount() float32 {
 	if x != nil && x.Amount != nil {
 		return *x.Amount
 	}
@@ -127,7 +127,7 @@ var file_v1_purchases_proto_rawDesc = []byte{
 	0x0a, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x69, 0x65, 0x72, 0x88, 0x01, 0x01, 0x12, 0x1c,
 	0x0a, 0x09, 0x70, 0x75, 0x72, 0x63, 0x68, 0x61, 0x73, 0x65, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28,
 	0x08, 0x52, 0x09, 0x70, 0x75, 0x72, 0x63, 0x68, 0x61, 0x73, 0x65, 0x64, 0x12, 0x1b, 0x0a, 0x06,
-	0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x48, 0x01, 0x52, 0x06,
+	0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x02, 0x48, 0x01, 0x52, 0x06,
 	0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x88, 0x01, 0x01, 0x12, 0x25, 0x0a, 0x0b, 0x6d, 0x65, 0x61,
 	0x73, 0x75, 0x72, 0x65, 0x55, 0x6e, 0x69, 0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x48, 0x02,
 	0x52, 0x0b, 0x6d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x55, 0x6e, 0x69, 0x74, 0x88, 0x01, 0x01,

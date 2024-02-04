@@ -8,7 +8,7 @@ message Purchase {
   string name = 2;
   optional int32 multiplier = 3;
   bool purchased = 4;
-  optional int32 amount = 5;
+  optional float amount = 5;
   optional string measureUnit = 6;
   optional string recipeId = 7;
 }

@@ -7,7 +7,7 @@ type Purchase struct {
 	Name        string
 	Multiplier  *int32
 	Purchased   bool
-	Amount      *int32
+	Amount      *float32
 	MeasureUnit *string
 	RecipeId    *uuid.UUID
 }
