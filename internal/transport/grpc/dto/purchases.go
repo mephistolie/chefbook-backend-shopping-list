@@ -8,8 +8,9 @@ import (
 )
 
 const (
+	maxNameLength  = 75
 	maxAmountCount = 10000
-	maxUnitLength  = 10
+	maxUnitLength  = 15
 )
 
 func parsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
@@ -23,6 +24,10 @@ func parsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
 		if len(rawPurchase.Name) == 0 {
 			continue
 		}
+		if len([]rune(rawPurchase.Name)) > maxNameLength {
+			measureUnit := string([]rune(rawPurchase.Name)[0:maxNameLength])
+			rawPurchase.MeasureUnit = &measureUnit
+		}
 
 		if rawPurchase.Amount != nil {
 			if *rawPurchase.Amount <= 0 {
@@ -35,8 +40,8 @@ func parsePurchases(rawPurchases []*api.Purchase) []entity.Purchase {
 			*rawPurchase.Amount = float32(math.Round(float64(*rawPurchase.Amount)*1000) / 1000)
 		}
 
-		if rawPurchase.MeasureUnit != nil && len(*rawPurchase.MeasureUnit) > maxUnitLength {
-			measureUnit := (*rawPurchase.MeasureUnit)[0:maxUnitLength]
+		if rawPurchase.MeasureUnit != nil && len([]rune(*rawPurchase.MeasureUnit)) > maxUnitLength {
+			measureUnit := string([]rune(*rawPurchase.MeasureUnit)[0:maxUnitLength])
 			rawPurchase.MeasureUnit = &measureUnit
 		}
 
