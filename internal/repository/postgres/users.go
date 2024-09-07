@@ -84,7 +84,7 @@ func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, ti
 
 	row := tx.QueryRow(createKeyQuery, shoppingListId, time.Now().Add(r.keyTtl))
 	if err := row.Scan(&key, &expiresAt); err != nil {
-		log.Errorf("unable to create shopping list %s key", shoppingListId, err)
+		log.Errorf("unable to create shopping list %s key: %s", shoppingListId, err)
 		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 	if expiresAt.Unix() < time.Now().Unix() {
@@ -122,7 +122,7 @@ func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID)
 		`, keysTable)
 
 	if _, err := tx.Exec(updateKeyQuery, key, expiresAt, shoppingListId); err != nil {
-		log.Errorf("unable to update shopping list %s key", shoppingListId, err)
+		log.Errorf("unable to update shopping list %s key: %s", shoppingListId, err)
 		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 
@@ -137,11 +137,12 @@ func (r *Repository) IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool
 			(
 				SELECT 1
 				FROM %s
-				WHERE shopping_list_id=$1 AND key=$2
+				WHERE shopping_list_id=$1 AND key=$2 AND expires_at>=$3
 			)
 		`, keysTable)
 
-	if err := r.db.Get(&valid, query, shoppingListId, key); err != nil {
+	currentTime := time.Now()
+	if err := r.db.Get(&valid, query, shoppingListId, key, currentTime); err != nil {
 		log.Errorf("unable to validate shopping list %s key: %s", shoppingListId, err)
 		return false, fail.GrpcUnknown
 	}
