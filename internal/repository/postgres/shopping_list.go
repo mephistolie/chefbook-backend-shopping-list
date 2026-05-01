@@ -8,7 +8,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
-	shoppingListFail "github.com/mephistolie/chefbook-backusersTableend-shopping-list/v2/internal/entity/fail"
+	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres/dto"
 )
 
