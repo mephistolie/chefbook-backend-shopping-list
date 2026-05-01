@@ -8,7 +8,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-common/log"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity"
-	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
+	shoppingListFail "github.com/mephistolie/chefbook-backusersTableend-shopping-list/v2/internal/entity/fail"
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres/dto"
 )
 
@@ -102,7 +102,7 @@ func (r *Repository) ensureShoppingListsLimit(tx *sql.Tx, userId uuid.UUID) erro
 	return nil
 }
 
-func (r *Repository) GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingList, error) {
+func (r *Repository) GetShoppingList(shoppingListId, userId uuid.UUID) (entity.ShoppingList, error) {
 	shoppingList := entity.ShoppingList{Id: shoppingListId}
 	var bsonPurchases []byte
 	var purchases []dto.Purchase
@@ -110,11 +110,11 @@ func (r *Repository) GetShoppingList(shoppingListId uuid.UUID) (entity.ShoppingL
 	query := fmt.Sprintf(`
 			SELECT %[2]v.name, %[1]v.type, %[1]v.purchases, %[1]v.owner_id, %[1]v.version
 			FROM %[1]v
-			LEFT JOIN %[2]v ON %[1]v.shopping_list_id=%[2]v.shopping_list_id
+			LEFT JOIN %[2]v ON %[1]v.shopping_list_id=%[2]v.shopping_list_id AND %[2]v.user_id=$2
 			WHERE %[1]v.shopping_list_id=$1
 		`, shoppingListsTable, usersTable)
 
-	row := r.db.QueryRow(query, shoppingListId)
+	row := r.db.QueryRow(query, shoppingListId, userId)
 	if err := row.Scan(&shoppingList.Name, &shoppingList.Type, &bsonPurchases, &shoppingList.Owner.Id,
 		&shoppingList.Version); err != nil {
 		log.Warnf("unable to get shopping list %s: %s", shoppingListId, err)

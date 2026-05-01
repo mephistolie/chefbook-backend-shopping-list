@@ -43,7 +43,7 @@ func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (
 		return s.getPersonalShoppingList(userId)
 	}
 
-	shoppingList, err := s.repo.GetShoppingList(*shoppingListId)
+	shoppingList, err := s.repo.GetShoppingList(*shoppingListId, userId)
 	if err != nil {
 		return entity.ShoppingList{}, err
 	}
@@ -79,7 +79,7 @@ func (s *Service) getPersonalShoppingList(userId uuid.UUID) (entity.ShoppingList
 		return entity.ShoppingList{}, err
 	}
 
-	shoppingList, err := s.repo.GetShoppingList(id)
+	shoppingList, err := s.repo.GetShoppingList(id, userId)
 	if err != nil {
 		return entity.ShoppingList{}, err
 	}
@@ -120,7 +120,7 @@ func (s *Service) AddPurchasesToShoppingList(input entity.ShoppingListInput) (in
 	if input.ShoppingListId == nil {
 		shoppingList, err = s.getPersonalShoppingList(input.EditorId)
 	} else {
-		if shoppingList, err = s.repo.GetShoppingList(*input.ShoppingListId); err == nil && input.EditorId != shoppingList.Owner.Id {
+		if shoppingList, err = s.repo.GetShoppingList(*input.ShoppingListId, input.EditorId); err == nil && input.EditorId != shoppingList.Owner.Id {
 			err = s.checkUserHasAccessToShoppingList(input.EditorId, *input.ShoppingListId, false)
 		}
 	}
