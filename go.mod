@@ -18,7 +18,7 @@ require (
 	github.com/mephistolie/chefbook-backend-recipe/api v1.7.8
 	github.com/mephistolie/chefbook-backend-shopping-list/api/v2 v2.4.3
 	github.com/peterbourgon/ff/v3 v3.4.0
-	github.com/wagslane/go-rabbitmq v0.12.3
+	github.com/wagslane/go-rabbitmq v0.15.0
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 	k8s.io/utils v0.0.0-20260319190234-28399d86e0b5

@@ -43,7 +43,6 @@ func (s *Server) Start() error {
 	var err error = nil
 	s.consumerProfiles, err = amqp.NewConsumer(
 		s.conn,
-		s.handleDelivery,
 		queueProfiles,
 		amqp.WithConsumerOptionsQueueQuorum,
 		amqp.WithConsumerOptionsQueueDurable,
@@ -56,6 +55,12 @@ func (s *Server) Start() error {
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		if err := s.consumerProfiles.Run(s.handleDelivery); err != nil {
+			log.Warnf("rabbitmq consumer stopped with error: %s", err)
+		}
+	}()
 
 	return nil
 }
