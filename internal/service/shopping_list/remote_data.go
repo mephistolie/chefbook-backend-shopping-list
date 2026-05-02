@@ -26,7 +26,7 @@ func (s *Service) getProfilesInfo(authorIds []string) map[string]*profileApi.Pro
 			}
 		}
 	} else {
-		log.Warn("unable to get recipe authors data: %s", err)
+		log.Warnf("unable to get recipe authors data: %s", err)
 	}
 
 	return infos

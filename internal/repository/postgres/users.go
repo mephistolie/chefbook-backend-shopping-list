@@ -46,7 +46,7 @@ func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID
 	for rows.Next() {
 		user := uuid.UUID{}
 		if err = rows.Scan(&user); err != nil {
-			log.Warnf("unable to parse shopping list user id: ", err)
+			log.Warnf("unable to parse shopping list user id: %s", err)
 			continue
 		}
 		users = append(users, user)

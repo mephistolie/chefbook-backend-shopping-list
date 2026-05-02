@@ -173,7 +173,7 @@ func (r *Repository) SetShoppingList(input entity.ShoppingListInput) (int32, err
 	if input.LastVersion != nil {
 		query = query + " AND version=$3 RETURNING version"
 		if err = r.db.Get(&version, query, bsonShoppingList, *input.ShoppingListId, *input.LastVersion); err != nil {
-			log.Warnf("try to update shopping list %s with outdated version %s: %s", *input.ShoppingListId, *input.LastVersion, err)
+			log.Warnf("try to update shopping list %s with outdated version %d: %s", *input.ShoppingListId, *input.LastVersion, err)
 			return 0, shoppingListFail.GrpcOutdatedVersion
 		}
 	} else {

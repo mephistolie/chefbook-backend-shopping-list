@@ -178,9 +178,9 @@ func concatenateShoppingLists(
 		if multiplier != nil && *multiplier > 0 {
 			log.Debugf("sum multipliers for purchase %s...", oldPurchase.Id)
 			totalMultiplier := *multiplier
-			log.Debugf("new multiplier for purchase %s is %s", oldPurchase.Id, totalMultiplier)
+			log.Debugf("new multiplier for purchase %s is %d", oldPurchase.Id, totalMultiplier)
 			if oldPurchase.Multiplier != nil {
-				log.Debugf("old multiplier for purchase %s is %s", oldPurchase.Id, *oldPurchase.Multiplier)
+				log.Debugf("old multiplier for purchase %s is %d", oldPurchase.Id, *oldPurchase.Multiplier)
 				totalMultiplier += *oldPurchase.Multiplier
 			}
 			(*oldPurchase).Multiplier = &totalMultiplier
@@ -188,9 +188,9 @@ func concatenateShoppingLists(
 		if amount != nil && *amount > 0 {
 			log.Debugf("sum amounts for purchase %s...", oldPurchase.Id)
 			totalAmount := *amount
-			log.Debugf("new amount for purchase %s is %s", oldPurchase.Id, totalAmount)
+			log.Debugf("new amount for purchase %s is %f", oldPurchase.Id, totalAmount)
 			if oldPurchase.Amount != nil {
-				log.Debugf("old amount for purchase %s is %s", oldPurchase.Id, *oldPurchase.Amount)
+				log.Debugf("old amount for purchase %s is %f", oldPurchase.Id, *oldPurchase.Amount)
 				totalAmount += *oldPurchase.Amount
 			}
 			(*oldPurchase).Amount = &totalAmount
