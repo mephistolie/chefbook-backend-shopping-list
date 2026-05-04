@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.GetShoppingListUsersRequest) (*api.GetShoppingListUsersResponse, error) {
+func (s *ShoppingListServer) GetShoppingListUsers(ctx context.Context, req *api.GetShoppingListUsersRequest) (*api.GetShoppingListUsersResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -20,7 +20,7 @@ func (s *ShoppingListServer) GetShoppingListUsers(_ context.Context, req *api.Ge
 		return nil, fail.GrpcInvalidBody
 	}
 
-	users, err := s.service.GetShoppingListUsers(shoppingListId, requesterId)
+	users, err := s.service.GetShoppingListUsers(ctx, shoppingListId, requesterId)
 	if err != nil {
 		return nil, err
 	}

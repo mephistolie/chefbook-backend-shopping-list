@@ -1,6 +1,7 @@
 package amqp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -92,13 +93,14 @@ func (s *Server) handleDelivery(delivery amqp.Delivery) amqp.Action {
 
 func (s *Server) handleMessage(msg MessageData) error {
 	log.Infof("processing message %s with type %s", msg.Id, msg.Type)
+	ctx := context.Background()
 	switch msg.Type {
 	case auth.MsgTypeProfileCreated:
-		return s.handleProfileCreatedMsg(msg.Id, msg.Body)
+		return s.handleProfileCreatedMsg(ctx, msg.Id, msg.Body)
 	case auth.MsgTypeProfileFirebaseImport:
-		return s.handleFirebaseImportMsg(msg.Id, msg.Body)
+		return s.handleFirebaseImportMsg(ctx, msg.Id, msg.Body)
 	case auth.MsgTypeProfileDeleted:
-		return s.handleProfileDeletedMsg(msg.Id, msg.Body)
+		return s.handleProfileDeletedMsg(ctx, msg.Id, msg.Body)
 	default:
 		log.Warnf("got unsupported message type %s for message %s", msg.Type, msg.Id)
 		return errors.New("not implemented")

@@ -1,6 +1,7 @@
 package mq
 
 import (
+	"context"
 	"errors"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/firebase"
@@ -24,11 +25,11 @@ func NewService(
 	}
 }
 
-func (s *Service) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
+func (s *Service) CreatePersonalShoppingList(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error {
 	return s.repo.CreatePersonalShoppingList(userId, messageId)
 }
 
-func (s *Service) ImportFirebaseShoppingList(userId uuid.UUID, firebaseId string, messageId uuid.UUID) error {
+func (s *Service) ImportFirebaseShoppingList(ctx context.Context, userId uuid.UUID, firebaseId string, messageId uuid.UUID) error {
 	if s.firebase == nil {
 		log.Warnf("try to import firebase profile with firebase import disabled")
 		return errors.New("firebase import disabled")
@@ -57,6 +58,6 @@ func (s *Service) ImportFirebaseShoppingList(userId uuid.UUID, firebaseId string
 	return s.repo.ImportFirebaseShoppingList(shoppingListId, purchases, messageId)
 }
 
-func (s *Service) DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error {
+func (s *Service) DeleteUserShoppingLists(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error {
 	return s.repo.DeleteUserShoppingLists(userId, messageId)
 }

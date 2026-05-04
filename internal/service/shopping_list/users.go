@@ -1,6 +1,7 @@
 package shopping_list
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/responses/fail"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]entity.User, error) {
+func (s *Service) GetShoppingListUsers(ctx context.Context, shoppingListId, requesterId uuid.UUID) ([]entity.User, error) {
 	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
 		return nil, err
 	}
@@ -24,7 +25,7 @@ func (s *Service) GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([
 		rawIds = append(rawIds, id.String())
 	}
 
-	profiles := s.getProfilesInfo(rawIds)
+	profiles := s.getProfilesInfo(ctx, rawIds)
 	for i := range users {
 		if profile, ok := profiles[users[i].Id.String()]; ok {
 			users[i].Name = profile.VisibleName

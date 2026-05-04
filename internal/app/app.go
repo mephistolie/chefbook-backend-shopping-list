@@ -36,7 +36,7 @@ func Run(cfg *config.Config) {
 		return
 	}
 
-	shoppingListService, err := service.New(cfg, repository, grpcServices)
+	shoppingListService, err := service.New(context.Background(), cfg, repository, grpcServices)
 	if err != nil {
 		log.Fatal(err)
 		return

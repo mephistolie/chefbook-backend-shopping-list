@@ -9,13 +9,13 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/transport/grpc/dto"
 )
 
-func (s *ShoppingListServer) GetShoppingLists(_ context.Context, req *api.GetShoppingListsRequest) (*api.GetShoppingListsResponse, error) {
+func (s *ShoppingListServer) GetShoppingLists(ctx context.Context, req *api.GetShoppingListsRequest) (*api.GetShoppingListsResponse, error) {
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
 	}
 
-	shoppingLists, err := s.service.GetShoppingLists(userId)
+	shoppingLists, err := s.service.GetShoppingLists(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (s *ShoppingListServer) CreateSharedShoppingList(_ context.Context, req *ap
 	return &api.CreateSharedShoppingListResponse{ShoppingListId: resultId.String()}, nil
 }
 
-func (s *ShoppingListServer) GetShoppingList(_ context.Context, req *api.GetShoppingListRequest) (*api.GetShoppingListResponse, error) {
+func (s *ShoppingListServer) GetShoppingList(ctx context.Context, req *api.GetShoppingListRequest) (*api.GetShoppingListResponse, error) {
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -63,7 +63,7 @@ func (s *ShoppingListServer) GetShoppingList(_ context.Context, req *api.GetShop
 		shoppingListIdPtr = &shoppingListId
 	}
 
-	shoppingList, err := s.service.GetShoppingList(shoppingListIdPtr, userId)
+	shoppingList, err := s.service.GetShoppingList(ctx, shoppingListIdPtr, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +103,13 @@ func (s *ShoppingListServer) SetShoppingList(_ context.Context, req *api.SetShop
 	return &api.SetShoppingListResponse{Version: version}, nil
 }
 
-func (s *ShoppingListServer) AddPurchasesToShoppingList(_ context.Context, req *api.SetShoppingListRequest) (*api.SetShoppingListResponse, error) {
+func (s *ShoppingListServer) AddPurchasesToShoppingList(ctx context.Context, req *api.SetShoppingListRequest) (*api.SetShoppingListResponse, error) {
 	input, err := dto.BindSetShoppingListRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	version, err := s.service.AddPurchasesToShoppingList(input)
+	version, err := s.service.AddPurchasesToShoppingList(ctx, input)
 	if err != nil {
 		return nil, err
 	}

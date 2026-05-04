@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (s *Service) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
+func (s *Service) GetShoppingLists(ctx context.Context, userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
 	shoppingLists, err := s.repo.GetShoppingLists(userId)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (s *Service) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo,
 		rawIds = append(rawIds, shoppingList.Owner.Id.String())
 	}
 
-	profiles := s.getProfilesInfo(rawIds)
+	profiles := s.getProfilesInfo(ctx, rawIds)
 	for i := range shoppingLists {
 		if profile, ok := profiles[shoppingLists[i].Owner.Id.String()]; ok {
 			shoppingLists[i].Owner.Name = profile.VisibleName
@@ -38,9 +38,9 @@ func (s *Service) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uui
 	return s.repo.CreateSharedShoppingList(userId, shoppingListId, name)
 }
 
-func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (entity.ShoppingList, error) {
+func (s *Service) GetShoppingList(ctx context.Context, shoppingListId *uuid.UUID, userId uuid.UUID) (entity.ShoppingList, error) {
 	if shoppingListId == nil {
-		return s.getPersonalShoppingList(userId)
+		return s.getPersonalShoppingList(ctx, userId)
 	}
 
 	shoppingList, err := s.repo.GetShoppingList(*shoppingListId, userId)
@@ -57,7 +57,7 @@ func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
-		profiles := s.getProfilesInfo([]string{shoppingList.Owner.Id.String()})
+		profiles := s.getProfilesInfo(ctx, []string{shoppingList.Owner.Id.String()})
 		if profile, ok := profiles[shoppingList.Owner.Id.String()]; ok {
 			shoppingList.Owner.Name = profile.VisibleName
 			shoppingList.Owner.Avatar = profile.Avatar
@@ -65,7 +65,7 @@ func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (
 		wg.Done()
 	}()
 	go func() {
-		shoppingList.RecipeNames = s.getRecipeNames(shoppingList.Purchases, userId)
+		shoppingList.RecipeNames = s.getRecipeNames(ctx, shoppingList.Purchases, userId)
 		wg.Done()
 	}()
 	wg.Wait()
@@ -73,7 +73,7 @@ func (s *Service) GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (
 	return shoppingList, nil
 }
 
-func (s *Service) getPersonalShoppingList(userId uuid.UUID) (entity.ShoppingList, error) {
+func (s *Service) getPersonalShoppingList(ctx context.Context, userId uuid.UUID) (entity.ShoppingList, error) {
 	id, err := s.repo.GetPersonalShoppingListId(userId)
 	if err != nil {
 		return entity.ShoppingList{}, err
@@ -84,7 +84,7 @@ func (s *Service) getPersonalShoppingList(userId uuid.UUID) (entity.ShoppingList
 		return entity.ShoppingList{}, err
 	}
 
-	shoppingList.RecipeNames = s.getRecipeNames(shoppingList.Purchases, userId)
+	shoppingList.RecipeNames = s.getRecipeNames(ctx, shoppingList.Purchases, userId)
 
 	return shoppingList, nil
 }
@@ -114,11 +114,11 @@ func (s *Service) SetPersonalShoppingList(input entity.ShoppingListInput) (int32
 	return s.repo.SetShoppingList(input)
 }
 
-func (s *Service) AddPurchasesToShoppingList(input entity.ShoppingListInput) (int32, error) {
+func (s *Service) AddPurchasesToShoppingList(ctx context.Context, input entity.ShoppingListInput) (int32, error) {
 	var shoppingList entity.ShoppingList
 	var err error = nil
 	if input.ShoppingListId == nil {
-		shoppingList, err = s.getPersonalShoppingList(input.EditorId)
+		shoppingList, err = s.getPersonalShoppingList(ctx, input.EditorId)
 	} else {
 		if shoppingList, err = s.repo.GetShoppingList(*input.ShoppingListId, input.EditorId); err == nil && input.EditorId != shoppingList.Owner.Id {
 			err = s.checkUserHasAccessToShoppingList(input.EditorId, *input.ShoppingListId, false)
@@ -233,7 +233,7 @@ func (s *Service) DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid
 	return s.repo.DeleteSharedShoppingList(shoppingListId)
 }
 
-func (s *Service) getRecipeNames(purchases []entity.Purchase, userId uuid.UUID) map[string]string {
+func (s *Service) getRecipeNames(ctx context.Context, purchases []entity.Purchase, userId uuid.UUID) map[string]string {
 
 	var recipeIds []string
 	for _, purchase := range purchases {
@@ -243,7 +243,7 @@ func (s *Service) getRecipeNames(purchases []entity.Purchase, userId uuid.UUID) 
 	}
 	recipeIds = slices.RemoveDuplicates(recipeIds)
 
-	ctx, cancelCtx := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancelCtx := context.WithTimeout(ctx, 3*time.Second)
 	res, err := s.grpc.Recipe.GetRecipeNames(ctx, &api.GetRecipeNamesRequest{
 		RecipeIds: recipeIds,
 		UserId:    userId.String(),

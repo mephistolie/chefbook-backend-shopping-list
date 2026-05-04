@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/mephistolie/chefbook-backend-common/firebase"
 	"github.com/mephistolie/chefbook-backend-common/log"
@@ -19,27 +20,28 @@ type Service struct {
 }
 
 type ShoppingList interface {
-	GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error)
+	GetShoppingLists(ctx context.Context, userId uuid.UUID) ([]entity.ShoppingListInfo, error)
 	CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error)
-	GetShoppingList(shoppingListId *uuid.UUID, userId uuid.UUID) (entity.ShoppingList, error)
+	GetShoppingList(ctx context.Context, shoppingListId *uuid.UUID, userId uuid.UUID) (entity.ShoppingList, error)
 	SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error
 	SetShoppingList(input entity.ShoppingListInput) (int32, error)
-	AddPurchasesToShoppingList(input entity.ShoppingListInput) (int32, error)
+	AddPurchasesToShoppingList(ctx context.Context, input entity.ShoppingListInput) (int32, error)
 	DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid.UUID) error
 
-	GetShoppingListUsers(shoppingListId, requesterId uuid.UUID) ([]entity.User, error)
+	GetShoppingListUsers(ctx context.Context, shoppingListId, requesterId uuid.UUID) ([]entity.User, error)
 	GetShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error)
 	JoinShoppingList(shoppingListId, userId, key uuid.UUID) error
 	DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error
 }
 
 type MQ interface {
-	CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error
-	ImportFirebaseShoppingList(userId uuid.UUID, firebaseId string, messageId uuid.UUID) error
-	DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error
+	CreatePersonalShoppingList(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error
+	ImportFirebaseShoppingList(ctx context.Context, userId uuid.UUID, firebaseId string, messageId uuid.UUID) error
+	DeleteUserShoppingLists(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error
 }
 
 func New(
+	ctx context.Context,
 	cfg *config.Config,
 	repo repository.ShoppingList,
 	grpc *grpc.Repository,
