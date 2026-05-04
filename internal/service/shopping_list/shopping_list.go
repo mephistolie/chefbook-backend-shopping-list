@@ -13,7 +13,7 @@ import (
 )
 
 func (s *Service) GetShoppingLists(ctx context.Context, userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
-	shoppingLists, err := s.repo.GetShoppingLists(userId)
+	shoppingLists, err := s.repo.GetShoppingLists(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +34,8 @@ func (s *Service) GetShoppingLists(ctx context.Context, userId uuid.UUID) ([]ent
 	return shoppingLists, nil
 }
 
-func (s *Service) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error) {
-	return s.repo.CreateSharedShoppingList(userId, shoppingListId, name)
+func (s *Service) CreateSharedShoppingList(ctx context.Context, userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error) {
+	return s.repo.CreateSharedShoppingList(ctx, userId, shoppingListId, name)
 }
 
 func (s *Service) GetShoppingList(ctx context.Context, shoppingListId *uuid.UUID, userId uuid.UUID) (entity.ShoppingList, error) {
@@ -43,13 +43,13 @@ func (s *Service) GetShoppingList(ctx context.Context, shoppingListId *uuid.UUID
 		return s.getPersonalShoppingList(ctx, userId)
 	}
 
-	shoppingList, err := s.repo.GetShoppingList(*shoppingListId, userId)
+	shoppingList, err := s.repo.GetShoppingList(ctx, *shoppingListId, userId)
 	if err != nil {
 		return entity.ShoppingList{}, err
 	}
 
 	if userId != shoppingList.Owner.Id {
-		if err = s.checkUserHasAccessToShoppingList(userId, *shoppingListId, false); err != nil {
+		if err = s.checkUserHasAccessToShoppingList(ctx, userId, *shoppingListId, false); err != nil {
 			return entity.ShoppingList{}, err
 		}
 	}
@@ -74,12 +74,12 @@ func (s *Service) GetShoppingList(ctx context.Context, shoppingListId *uuid.UUID
 }
 
 func (s *Service) getPersonalShoppingList(ctx context.Context, userId uuid.UUID) (entity.ShoppingList, error) {
-	id, err := s.repo.GetPersonalShoppingListId(userId)
+	id, err := s.repo.GetPersonalShoppingListId(ctx, userId)
 	if err != nil {
 		return entity.ShoppingList{}, err
 	}
 
-	shoppingList, err := s.repo.GetShoppingList(id, userId)
+	shoppingList, err := s.repo.GetShoppingList(ctx, id, userId)
 	if err != nil {
 		return entity.ShoppingList{}, err
 	}
@@ -89,29 +89,29 @@ func (s *Service) getPersonalShoppingList(ctx context.Context, userId uuid.UUID)
 	return shoppingList, nil
 }
 
-func (s *Service) SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error {
-	return s.repo.SetShoppingListName(shoppingListId, userId, name)
+func (s *Service) SetShoppingListName(ctx context.Context, shoppingListId, userId uuid.UUID, name *string) error {
+	return s.repo.SetShoppingListName(ctx, shoppingListId, userId, name)
 }
 
-func (s *Service) SetShoppingList(input entity.ShoppingListInput) (int32, error) {
+func (s *Service) SetShoppingList(ctx context.Context, input entity.ShoppingListInput) (int32, error) {
 	if input.ShoppingListId == nil {
-		return s.SetPersonalShoppingList(input)
+		return s.SetPersonalShoppingList(ctx, input)
 	}
 
-	if err := s.checkUserHasAccessToShoppingList(input.EditorId, *input.ShoppingListId, true); err != nil {
+	if err := s.checkUserHasAccessToShoppingList(ctx, input.EditorId, *input.ShoppingListId, true); err != nil {
 		return 0, err
 	}
 
-	return s.repo.SetShoppingList(input)
+	return s.repo.SetShoppingList(ctx, input)
 }
 
-func (s *Service) SetPersonalShoppingList(input entity.ShoppingListInput) (int32, error) {
-	id, err := s.repo.GetPersonalShoppingListId(input.EditorId)
+func (s *Service) SetPersonalShoppingList(ctx context.Context, input entity.ShoppingListInput) (int32, error) {
+	id, err := s.repo.GetPersonalShoppingListId(ctx, input.EditorId)
 	if err != nil {
 		return 0, err
 	}
 	input.ShoppingListId = &id
-	return s.repo.SetShoppingList(input)
+	return s.repo.SetShoppingList(ctx, input)
 }
 
 func (s *Service) AddPurchasesToShoppingList(ctx context.Context, input entity.ShoppingListInput) (int32, error) {
@@ -120,8 +120,8 @@ func (s *Service) AddPurchasesToShoppingList(ctx context.Context, input entity.S
 	if input.ShoppingListId == nil {
 		shoppingList, err = s.getPersonalShoppingList(ctx, input.EditorId)
 	} else {
-		if shoppingList, err = s.repo.GetShoppingList(*input.ShoppingListId, input.EditorId); err == nil && input.EditorId != shoppingList.Owner.Id {
-			err = s.checkUserHasAccessToShoppingList(input.EditorId, *input.ShoppingListId, false)
+		if shoppingList, err = s.repo.GetShoppingList(ctx, *input.ShoppingListId, input.EditorId); err == nil && input.EditorId != shoppingList.Owner.Id {
+			err = s.checkUserHasAccessToShoppingList(ctx, input.EditorId, *input.ShoppingListId, false)
 		}
 	}
 	if err != nil {
@@ -140,7 +140,7 @@ func (s *Service) AddPurchasesToShoppingList(ctx context.Context, input entity.S
 		LastVersion:    input.LastVersion,
 	}
 
-	return s.repo.SetShoppingList(concatenatedInput)
+	return s.repo.SetShoppingList(ctx, concatenatedInput)
 }
 
 func concatenateShoppingLists(
@@ -226,11 +226,11 @@ func isSamePurchase(first, second entity.Purchase) bool {
 	return true
 }
 
-func (s *Service) DeleteSharedShoppingList(shoppingListId uuid.UUID, userId uuid.UUID) error {
-	if err := s.checkUserIsShoppingListOwner(userId, shoppingListId); err != nil {
+func (s *Service) DeleteSharedShoppingList(ctx context.Context, shoppingListId uuid.UUID, userId uuid.UUID) error {
+	if err := s.checkUserIsShoppingListOwner(ctx, userId, shoppingListId); err != nil {
 		return err
 	}
-	return s.repo.DeleteSharedShoppingList(shoppingListId)
+	return s.repo.DeleteSharedShoppingList(ctx, shoppingListId)
 }
 
 func (s *Service) getRecipeNames(ctx context.Context, purchases []entity.Purchase, userId uuid.UUID) map[string]string {

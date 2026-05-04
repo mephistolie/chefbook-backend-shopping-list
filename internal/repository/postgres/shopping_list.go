@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 	"github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/repository/postgres/dto"
 )
 
-func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
+func (r *Repository) GetShoppingLists(ctx context.Context, userId uuid.UUID) ([]entity.ShoppingListInfo, error) {
 	var shoppingLists []entity.ShoppingListInfo
 
 	query := fmt.Sprintf(`
@@ -22,7 +23,7 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListIn
 			WHERE %[1]v.user_id=$1
 		`, usersTable, shoppingListsTable)
 
-	rows, err := r.db.Query(query, userId)
+	rows, err := r.db.QueryContext(ctx, query, userId)
 	if err != nil {
 		log.Errorf("unable to get shopping lists for user %s: %s", userId, err)
 		return nil, fail.GrpcUnknown
@@ -41,7 +42,7 @@ func (r *Repository) GetShoppingLists(userId uuid.UUID) ([]entity.ShoppingListIn
 	return shoppingLists, nil
 }
 
-func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error) {
+func (r *Repository) CreateSharedShoppingList(ctx context.Context, userId uuid.UUID, shoppingListId *uuid.UUID, name *string) (uuid.UUID, error) {
 	var id uuid.UUID
 	if shoppingListId != nil {
 		id = *shoppingListId
@@ -49,12 +50,12 @@ func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *
 		id = uuid.New()
 	}
 
-	tx, err := r.startTransaction()
+	tx, err := r.startTransaction(ctx)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
 
-	if err = r.ensureShoppingListsLimit(tx, userId); err != nil {
+	if err = r.ensureShoppingListsLimit(ctx, tx, userId); err != nil {
 		return uuid.UUID{}, err
 	}
 
@@ -63,7 +64,7 @@ func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *
 			VALUES ($1, 'shared', $2)
 		`, shoppingListsTable)
 
-	if _, err := tx.Exec(createShoppingListQuery, id, userId); err != nil {
+	if _, err := tx.ExecContext(ctx, createShoppingListQuery, id, userId); err != nil {
 		log.Errorf("unable to create shared shopping list for user %s: %s", userId, err)
 		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -73,7 +74,7 @@ func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *
 			VALUES ($1, $2, $3)
 		`, usersTable)
 
-	if _, err := tx.Exec(createConnectionQuery, id, userId, name); err != nil {
+	if _, err := tx.ExecContext(ctx, createConnectionQuery, id, userId, name); err != nil {
 		log.Errorf("unable to create connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
 		return uuid.UUID{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -81,7 +82,7 @@ func (r *Repository) CreateSharedShoppingList(userId uuid.UUID, shoppingListId *
 	return id, commitTransaction(tx)
 }
 
-func (r *Repository) ensureShoppingListsLimit(tx *sql.Tx, userId uuid.UUID) error {
+func (r *Repository) ensureShoppingListsLimit(ctx context.Context, tx *sql.Tx, userId uuid.UUID) error {
 	var count int
 	getShoppingListsCountQuery := fmt.Sprintf(`
 			SELECT count(shopping_list_id)
@@ -89,7 +90,7 @@ func (r *Repository) ensureShoppingListsLimit(tx *sql.Tx, userId uuid.UUID) erro
 			WHERE owner_id=$1
 		`, shoppingListsTable)
 
-	row := tx.QueryRow(getShoppingListsCountQuery, userId)
+	row := tx.QueryRowContext(ctx, getShoppingListsCountQuery, userId)
 	if err := row.Scan(&count); err != nil {
 		log.Errorf("unable to get shopping lists count for user %s: %s", userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
@@ -102,7 +103,7 @@ func (r *Repository) ensureShoppingListsLimit(tx *sql.Tx, userId uuid.UUID) erro
 	return nil
 }
 
-func (r *Repository) GetShoppingList(shoppingListId, userId uuid.UUID) (entity.ShoppingList, error) {
+func (r *Repository) GetShoppingList(ctx context.Context, shoppingListId, userId uuid.UUID) (entity.ShoppingList, error) {
 	shoppingList := entity.ShoppingList{Id: shoppingListId}
 	var bsonPurchases []byte
 	var purchases []dto.Purchase
@@ -114,7 +115,7 @@ func (r *Repository) GetShoppingList(shoppingListId, userId uuid.UUID) (entity.S
 			WHERE %[1]v.shopping_list_id=$1
 		`, shoppingListsTable, usersTable)
 
-	row := r.db.QueryRow(query, shoppingListId, userId)
+	row := r.db.QueryRowContext(ctx, query, shoppingListId, userId)
 	if err := row.Scan(&shoppingList.Name, &shoppingList.Type, &bsonPurchases, &shoppingList.Owner.Id,
 		&shoppingList.Version); err != nil {
 		log.Warnf("unable to get shopping list %s: %s", shoppingListId, err)
@@ -123,7 +124,7 @@ func (r *Repository) GetShoppingList(shoppingListId, userId uuid.UUID) (entity.S
 
 	if err := json.Unmarshal(bsonPurchases, &purchases); err != nil {
 		log.Warnf("unable to unmarshal shopping list %s purchases: %s", shoppingListId, err)
-		shoppingList.Version, err = r.SetShoppingList(entity.ShoppingListInput{ShoppingListId: &shoppingListId})
+		shoppingList.Version, err = r.SetShoppingList(ctx, entity.ShoppingListInput{ShoppingListId: &shoppingListId})
 		return shoppingList, err
 	}
 	shoppingList.Purchases = dto.NewPurchasesEntity(purchases)
@@ -131,7 +132,7 @@ func (r *Repository) GetShoppingList(shoppingListId, userId uuid.UUID) (entity.S
 	return shoppingList, nil
 }
 
-func (r *Repository) GetPersonalShoppingListId(userId uuid.UUID) (uuid.UUID, error) {
+func (r *Repository) GetPersonalShoppingListId(ctx context.Context, userId uuid.UUID) (uuid.UUID, error) {
 	var id uuid.UUID
 
 	query := fmt.Sprintf(`
@@ -148,14 +149,14 @@ func (r *Repository) GetPersonalShoppingListId(userId uuid.UUID) (uuid.UUID, err
 	return id, nil
 }
 
-func (r *Repository) SetShoppingListName(shoppingListId, userId uuid.UUID, name *string) error {
+func (r *Repository) SetShoppingListName(ctx context.Context, shoppingListId, userId uuid.UUID, name *string) error {
 	query := fmt.Sprintf(`
 			UPDATE %s
 			SET name=$1
 			WHERE shopping_list_id=$2 AND user_id=$3
 		`, usersTable)
 
-	if _, err := r.db.Exec(query, name, shoppingListId, userId); err != nil {
+	if _, err := r.db.ExecContext(ctx, query, name, shoppingListId, userId); err != nil {
 		log.Errorf("unable to set shopping list %s name for user %s: %s", shoppingListId, userId, err)
 		return fail.GrpcUnknown
 	}
@@ -163,7 +164,7 @@ func (r *Repository) SetShoppingListName(shoppingListId, userId uuid.UUID, name 
 	return nil
 }
 
-func (r *Repository) SetShoppingList(input entity.ShoppingListInput) (int32, error) {
+func (r *Repository) SetShoppingList(ctx context.Context, input entity.ShoppingListInput) (int32, error) {
 	query, bsonShoppingList, err := getSetShoppingListBaseQuery(input.Purchases)
 	if err != nil {
 		return 0, err
@@ -187,13 +188,13 @@ func (r *Repository) SetShoppingList(input entity.ShoppingListInput) (int32, err
 	return version, nil
 }
 
-func (r *Repository) DeleteSharedShoppingList(shoppingListId uuid.UUID) error {
+func (r *Repository) DeleteSharedShoppingList(ctx context.Context, shoppingListId uuid.UUID) error {
 	query := fmt.Sprintf(`
 			DELETE FROM %s
 			WHERE shopping_list_id=$1 AND type='shared' 
 		`, shoppingListsTable)
 
-	if _, err := r.db.Exec(query, shoppingListId); err != nil {
+	if _, err := r.db.ExecContext(ctx, query, shoppingListId); err != nil {
 		log.Errorf("unable to delete shared shopping list %s: %s", shoppingListId, err)
 		return fail.GrpcUnknown
 	}

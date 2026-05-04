@@ -11,10 +11,10 @@ import (
 )
 
 func (s *Service) GetShoppingListUsers(ctx context.Context, shoppingListId, requesterId uuid.UUID) ([]entity.User, error) {
-	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
+	if err := s.checkUserIsShoppingListOwner(ctx, requesterId, shoppingListId); err != nil {
 		return nil, err
 	}
-	ids, err := s.repo.GetShoppingListUsers(shoppingListId)
+	ids, err := s.repo.GetShoppingListUsers(ctx, shoppingListId)
 	if err != nil {
 		return nil, err
 	}
@@ -36,31 +36,31 @@ func (s *Service) GetShoppingListUsers(ctx context.Context, shoppingListId, requ
 	return users, nil
 }
 
-func (s *Service) GetShoppingListLink(shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error) {
-	if shoppingListType, err := s.repo.GetShoppingListType(shoppingListId); err != nil || shoppingListType != string(entity.ShoppingListTypeShared) {
+func (s *Service) GetShoppingListLink(ctx context.Context, shoppingListId, requesterId uuid.UUID, linkPattern string) (string, time.Time, error) {
+	if shoppingListType, err := s.repo.GetShoppingListType(ctx, shoppingListId); err != nil || shoppingListType != string(entity.ShoppingListTypeShared) {
 		return "", time.Time{}, shoppingListFail.GrpcPersonalShoppingList
 	}
 
-	if err := s.checkUserIsShoppingListOwner(requesterId, shoppingListId); err != nil {
+	if err := s.checkUserIsShoppingListOwner(ctx, requesterId, shoppingListId); err != nil {
 		return "", time.Time{}, err
 	}
 
-	key, expiresAt, err := s.repo.GetShoppingListKey(shoppingListId)
+	key, expiresAt, err := s.repo.GetShoppingListKey(ctx, shoppingListId)
 	if err != nil {
 		return "", time.Time{}, err
 	}
 	return fmt.Sprintf(linkPattern, shoppingListId.String(), key.String()), expiresAt, nil
 }
 
-func (s *Service) JoinShoppingList(shoppingListId, userId, key uuid.UUID) error {
-	if valid, err := s.repo.IsShoppingListKeyValid(shoppingListId, key); err != nil || !valid {
+func (s *Service) JoinShoppingList(ctx context.Context, shoppingListId, userId, key uuid.UUID) error {
+	if valid, err := s.repo.IsShoppingListKeyValid(ctx, shoppingListId, key); err != nil || !valid {
 		return shoppingListFail.GrpcInvalidShoppingListKey
 	}
-	return s.repo.AddUserToShoppingList(userId, shoppingListId)
+	return s.repo.AddUserToShoppingList(ctx, userId, shoppingListId)
 }
 
-func (s *Service) DeleteUserFromShoppingList(userId, shoppingListId, requesterId uuid.UUID) error {
-	ownerId, err := s.repo.GetShoppingListOwner(shoppingListId)
+func (s *Service) DeleteUserFromShoppingList(ctx context.Context, userId, shoppingListId, requesterId uuid.UUID) error {
+	ownerId, err := s.repo.GetShoppingListOwner(ctx, shoppingListId)
 	if err != nil {
 		return err
 	}
@@ -70,12 +70,12 @@ func (s *Service) DeleteUserFromShoppingList(userId, shoppingListId, requesterId
 	if userId == ownerId {
 		return shoppingListFail.GrpcShoppingListOwner
 	}
-	return s.repo.DeleteUserFromShoppingList(userId, shoppingListId)
+	return s.repo.DeleteUserFromShoppingList(ctx, userId, shoppingListId)
 }
 
-func (s *Service) checkUserHasAccessToShoppingList(userId, shoppingListId uuid.UUID, checkOwnership bool) error {
+func (s *Service) checkUserHasAccessToShoppingList(ctx context.Context, userId, shoppingListId uuid.UUID, checkOwnership bool) error {
 	if checkOwnership {
-		ownerId, err := s.repo.GetShoppingListOwner(shoppingListId)
+		ownerId, err := s.repo.GetShoppingListOwner(ctx, shoppingListId)
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func (s *Service) checkUserHasAccessToShoppingList(userId, shoppingListId uuid.U
 		}
 	}
 
-	users, err := s.repo.GetShoppingListUsers(shoppingListId)
+	users, err := s.repo.GetShoppingListUsers(ctx, shoppingListId)
 	if err != nil {
 		return err
 	}
@@ -102,8 +102,8 @@ func (s *Service) checkUserHasAccessToShoppingList(userId, shoppingListId uuid.U
 	return nil
 }
 
-func (s *Service) checkUserIsShoppingListOwner(userId, shoppingListId uuid.UUID) error {
-	ownerId, err := s.repo.GetShoppingListOwner(shoppingListId)
+func (s *Service) checkUserIsShoppingListOwner(ctx context.Context, userId, shoppingListId uuid.UUID) error {
+	ownerId, err := s.repo.GetShoppingListOwner(ctx, shoppingListId)
 	if err != nil {
 		return err
 	}

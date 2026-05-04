@@ -22,7 +22,7 @@ func (s *ShoppingListServer) GetShoppingLists(ctx context.Context, req *api.GetS
 	return &api.GetShoppingListsResponse{ShoppingLists: dto.NewShoppingListsResponse(shoppingLists)}, nil
 }
 
-func (s *ShoppingListServer) CreateSharedShoppingList(_ context.Context, req *api.CreateSharedShoppingListRequest) (*api.CreateSharedShoppingListResponse, error) {
+func (s *ShoppingListServer) CreateSharedShoppingList(ctx context.Context, req *api.CreateSharedShoppingListRequest) (*api.CreateSharedShoppingListResponse, error) {
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -45,7 +45,7 @@ func (s *ShoppingListServer) CreateSharedShoppingList(_ context.Context, req *ap
 		return nil, fail.GrpcPremiumRequired
 	}
 
-	resultId, err := s.service.CreateSharedShoppingList(userId, shoppingListId, name)
+	resultId, err := s.service.CreateSharedShoppingList(ctx, userId, shoppingListId, name)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (s *ShoppingListServer) GetShoppingList(ctx context.Context, req *api.GetSh
 	return dto.NewGetShoppingListResponse(shoppingList), nil
 }
 
-func (s *ShoppingListServer) SetShoppingListName(_ context.Context, req *api.SetShoppingListNameRequest) (*api.SetShoppingListNameResponse, error) {
+func (s *ShoppingListServer) SetShoppingListName(ctx context.Context, req *api.SetShoppingListNameRequest) (*api.SetShoppingListNameResponse, error) {
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -84,19 +84,19 @@ func (s *ShoppingListServer) SetShoppingListName(_ context.Context, req *api.Set
 		req.Name = &name
 	}
 
-	if err := s.service.SetShoppingListName(shoppingListId, userId, req.Name); err != nil {
+	if err := s.service.SetShoppingListName(ctx, shoppingListId, userId, req.Name); err != nil {
 		return nil, err
 	}
 	return &api.SetShoppingListNameResponse{Message: "shopping list name updated"}, nil
 }
 
-func (s *ShoppingListServer) SetShoppingList(_ context.Context, req *api.SetShoppingListRequest) (*api.SetShoppingListResponse, error) {
+func (s *ShoppingListServer) SetShoppingList(ctx context.Context, req *api.SetShoppingListRequest) (*api.SetShoppingListResponse, error) {
 	input, err := dto.BindSetShoppingListRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	version, err := s.service.SetShoppingList(input)
+	version, err := s.service.SetShoppingList(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (s *ShoppingListServer) AddPurchasesToShoppingList(ctx context.Context, req
 	return &api.SetShoppingListResponse{Version: version}, nil
 }
 
-func (s *ShoppingListServer) DeleteSharedShoppingList(_ context.Context, req *api.DeleteSharedShoppingListRequest) (*api.DeleteSharedShoppingListResponse, error) {
+func (s *ShoppingListServer) DeleteSharedShoppingList(ctx context.Context, req *api.DeleteSharedShoppingListRequest) (*api.DeleteSharedShoppingListResponse, error) {
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -126,7 +126,7 @@ func (s *ShoppingListServer) DeleteSharedShoppingList(_ context.Context, req *ap
 		return nil, fail.GrpcInvalidBody
 	}
 
-	err = s.service.DeleteSharedShoppingList(shoppingListId, userId)
+	err = s.service.DeleteSharedShoppingList(ctx, shoppingListId, userId)
 	if err != nil {
 		return nil, err
 	}

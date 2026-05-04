@@ -26,7 +26,7 @@ func NewService(
 }
 
 func (s *Service) CreatePersonalShoppingList(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error {
-	return s.repo.CreatePersonalShoppingList(userId, messageId)
+	return s.repo.CreatePersonalShoppingList(ctx, userId, messageId)
 }
 
 func (s *Service) ImportFirebaseShoppingList(ctx context.Context, userId uuid.UUID, firebaseId string, messageId uuid.UUID) error {
@@ -51,13 +51,13 @@ func (s *Service) ImportFirebaseShoppingList(ctx context.Context, userId uuid.UU
 		purchases = append(purchases, purchase)
 	}
 
-	shoppingListId, err := s.repo.GetPersonalShoppingListId(userId)
+	shoppingListId, err := s.repo.GetPersonalShoppingListId(ctx, userId)
 	if err != nil {
 		return err
 	}
-	return s.repo.ImportFirebaseShoppingList(shoppingListId, purchases, messageId)
+	return s.repo.ImportFirebaseShoppingList(ctx, shoppingListId, purchases, messageId)
 }
 
 func (s *Service) DeleteUserShoppingLists(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error {
-	return s.repo.DeleteUserShoppingLists(userId, messageId)
+	return s.repo.DeleteUserShoppingLists(ctx, userId, messageId)
 }

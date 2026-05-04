@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -47,8 +48,8 @@ func NewRepository(db *sqlx.DB, cfg config.ShoppingList) *Repository {
 	}
 }
 
-func (r *Repository) startTransaction() (*sql.Tx, error) {
-	tx, err := r.db.Begin()
+func (r *Repository) startTransaction(ctx context.Context) (*sql.Tx, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		log.Error("unable to begin transaction: ", err)
 		return nil, fail.GrpcUnknown

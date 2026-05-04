@@ -28,7 +28,7 @@ func (s *ShoppingListServer) GetShoppingListUsers(ctx context.Context, req *api.
 	return &api.GetShoppingListUsersResponse{Users: dto.NewShoppingListUsersResponse(users)}, nil
 }
 
-func (s *ShoppingListServer) GetSharedShoppingListLink(_ context.Context, req *api.GetSharedShoppingListLinkRequest) (*api.GetSharedShoppingListLinkResponse, error) {
+func (s *ShoppingListServer) GetSharedShoppingListLink(ctx context.Context, req *api.GetSharedShoppingListLinkRequest) (*api.GetSharedShoppingListLinkResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -38,7 +38,7 @@ func (s *ShoppingListServer) GetSharedShoppingListLink(_ context.Context, req *a
 		return nil, fail.GrpcInvalidBody
 	}
 
-	link, expiresAt, err := s.service.GetShoppingListLink(shoppingListId, requesterId, req.LinkPattern)
+	link, expiresAt, err := s.service.GetShoppingListLink(ctx, shoppingListId, requesterId, req.LinkPattern)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (s *ShoppingListServer) GetSharedShoppingListLink(_ context.Context, req *a
 	return &api.GetSharedShoppingListLinkResponse{Link: link, ExpiresAt: timestamppb.New(expiresAt)}, nil
 }
 
-func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinShoppingListRequest) (*api.JoinShoppingListResponse, error) {
+func (s *ShoppingListServer) JoinShoppingList(ctx context.Context, req *api.JoinShoppingListRequest) (*api.JoinShoppingListResponse, error) {
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -60,7 +60,7 @@ func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinSh
 		return nil, shoppingListFail.GrpcInvalidShoppingListKey
 	}
 
-	err = s.service.JoinShoppingList(shoppingListId, userId, key)
+	err = s.service.JoinShoppingList(ctx, shoppingListId, userId, key)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (s *ShoppingListServer) JoinShoppingList(_ context.Context, req *api.JoinSh
 	return &api.JoinShoppingListResponse{Message: "joined"}, nil
 }
 
-func (s *ShoppingListServer) DeleteUserFromShoppingList(_ context.Context, req *api.DeleteUserFromShoppingListRequest) (*api.DeleteUserFromShoppingListResponse, error) {
+func (s *ShoppingListServer) DeleteUserFromShoppingList(ctx context.Context, req *api.DeleteUserFromShoppingListRequest) (*api.DeleteUserFromShoppingListResponse, error) {
 	requesterId, err := uuid.Parse(req.RequesterId)
 	if err != nil {
 		return nil, fail.GrpcInvalidBody
@@ -82,7 +82,7 @@ func (s *ShoppingListServer) DeleteUserFromShoppingList(_ context.Context, req *
 		return nil, fail.GrpcInvalidBody
 	}
 
-	err = s.service.DeleteUserFromShoppingList(userId, shoppingListId, requesterId)
+	err = s.service.DeleteUserFromShoppingList(ctx, userId, shoppingListId, requesterId)
 	if err != nil {
 		return nil, err
 	}

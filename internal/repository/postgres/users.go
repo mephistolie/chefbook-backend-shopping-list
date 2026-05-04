@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/google/uuid"
@@ -10,7 +11,7 @@ import (
 	"time"
 )
 
-func (r *Repository) GetShoppingListOwner(shoppingListId uuid.UUID) (uuid.UUID, error) {
+func (r *Repository) GetShoppingListOwner(ctx context.Context, shoppingListId uuid.UUID) (uuid.UUID, error) {
 	ownerId := uuid.UUID{}
 
 	query := fmt.Sprintf(`
@@ -28,7 +29,7 @@ func (r *Repository) GetShoppingListOwner(shoppingListId uuid.UUID) (uuid.UUID, 
 	return ownerId, nil
 }
 
-func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID, error) {
+func (r *Repository) GetShoppingListUsers(ctx context.Context, shoppingListId uuid.UUID) ([]uuid.UUID, error) {
 	var users []uuid.UUID
 
 	query := fmt.Sprintf(`
@@ -37,7 +38,7 @@ func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID
 			WHERE shopping_list_id=$1
 		`, usersTable)
 
-	rows, err := r.db.Query(query, shoppingListId)
+	rows, err := r.db.QueryContext(ctx, query, shoppingListId)
 	if err != nil {
 		log.Errorf("unable to get shopping list %s users: %s", shoppingListId, err)
 		return nil, fail.GrpcUnknown
@@ -55,8 +56,8 @@ func (r *Repository) GetShoppingListUsers(shoppingListId uuid.UUID) ([]uuid.UUID
 	return users, nil
 }
 
-func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
-	tx, err := r.startTransaction()
+func (r *Repository) GetShoppingListKey(ctx context.Context, shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
+	tx, err := r.startTransaction(ctx)
 	if err != nil {
 		return uuid.UUID{}, time.Time{}, err
 	}
@@ -82,20 +83,20 @@ func (r *Repository) GetShoppingListKey(shoppingListId uuid.UUID) (uuid.UUID, ti
 			SELECT key, expires_at FROM s
 		`, keysTable)
 
-	row := tx.QueryRow(createKeyQuery, shoppingListId, time.Now().Add(r.keyTtl))
+	row := tx.QueryRowContext(ctx, createKeyQuery, shoppingListId, time.Now().Add(r.keyTtl))
 	if err := row.Scan(&key, &expiresAt); err != nil {
 		log.Errorf("unable to create shopping list %s key: %s", shoppingListId, err)
 		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
 	if expiresAt.Unix() < time.Now().Unix() {
 		log.Debugf("key for shopping list %s is outdated; updating...", shoppingListId.String())
-		return r.updateShoppingListKey(tx, shoppingListId)
+		return r.updateShoppingListKey(ctx, tx, shoppingListId)
 	}
 
 	return key, expiresAt, commitTransaction(tx)
 }
 
-func (r *Repository) GetShoppingListType(shoppingListId uuid.UUID) (string, error) {
+func (r *Repository) GetShoppingListType(ctx context.Context, shoppingListId uuid.UUID) (string, error) {
 	shoppingListType := ""
 
 	query := fmt.Sprintf(`
@@ -104,14 +105,14 @@ func (r *Repository) GetShoppingListType(shoppingListId uuid.UUID) (string, erro
 			WHERE shopping_list_id=$1
 		`, shoppingListsTable)
 
-	if err := r.db.Get(&shoppingListType, query, shoppingListId); err != nil {
+	if err := r.db.GetContext(ctx, &shoppingListType, query, shoppingListId); err != nil {
 		log.Warnf("unable to get shopping list %s type: %s", shoppingListId, err)
 		return "", shoppingListFail.GrpcShoppingListNotFound
 	}
 	return shoppingListType, nil
 }
 
-func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
+func (r *Repository) updateShoppingListKey(ctx context.Context, tx *sql.Tx, shoppingListId uuid.UUID) (uuid.UUID, time.Time, error) {
 	key := uuid.New()
 	expiresAt := time.Now().Add(r.keyTtl)
 
@@ -121,7 +122,7 @@ func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID)
 			WHERE shopping_list_id=$3
 		`, keysTable)
 
-	if _, err := tx.Exec(updateKeyQuery, key, expiresAt, shoppingListId); err != nil {
+	if _, err := tx.ExecContext(ctx, updateKeyQuery, key, expiresAt, shoppingListId); err != nil {
 		log.Errorf("unable to update shopping list %s key: %s", shoppingListId, err)
 		return uuid.UUID{}, time.Time{}, errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -129,7 +130,7 @@ func (r *Repository) updateShoppingListKey(tx *sql.Tx, shoppingListId uuid.UUID)
 	return key, expiresAt, commitTransaction(tx)
 }
 
-func (r *Repository) IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool, error) {
+func (r *Repository) IsShoppingListKeyValid(ctx context.Context, shoppingListId, key uuid.UUID) (bool, error) {
 	valid := false
 
 	query := fmt.Sprintf(`
@@ -149,13 +150,13 @@ func (r *Repository) IsShoppingListKeyValid(shoppingListId, key uuid.UUID) (bool
 	return true, nil
 }
 
-func (r *Repository) AddUserToShoppingList(userId, shoppingListId uuid.UUID) error {
+func (r *Repository) AddUserToShoppingList(ctx context.Context, userId, shoppingListId uuid.UUID) error {
 	query := fmt.Sprintf(`
 			INSERT INTO %[1]v (shopping_list_id, user_id)
 			VALUES ($1, $2)
 		`, usersTable)
 
-	if _, err := r.db.Exec(query, shoppingListId, userId); err != nil {
+	if _, err := r.db.ExecContext(ctx, query, shoppingListId, userId); err != nil {
 		if isUniqueViolationError(err) {
 			return nil
 		}
@@ -165,13 +166,13 @@ func (r *Repository) AddUserToShoppingList(userId, shoppingListId uuid.UUID) err
 	return nil
 }
 
-func (r *Repository) DeleteUserFromShoppingList(userId, shoppingListId uuid.UUID) error {
+func (r *Repository) DeleteUserFromShoppingList(ctx context.Context, userId, shoppingListId uuid.UUID) error {
 	query := fmt.Sprintf(`
 			DELETE FROM %s
 			WHERE shopping_list_id=$1 AND user_id=$2
 		`, usersTable)
 
-	if _, err := r.db.Exec(query, shoppingListId, userId); err != nil {
+	if _, err := r.db.ExecContext(ctx, query, shoppingListId, userId); err != nil {
 		log.Errorf("unable to delete connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
 		return fail.GrpcUnknown
 	}

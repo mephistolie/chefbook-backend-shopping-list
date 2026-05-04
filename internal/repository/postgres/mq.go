@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/google/uuid"
@@ -10,8 +11,8 @@ import (
 	shoppingListFail "github.com/mephistolie/chefbook-backend-shopping-list/v2/internal/entity/fail"
 )
 
-func (r *Repository) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid.UUID) error {
-	tx, err := r.handleMessageIdempotently(messageId)
+func (r *Repository) CreatePersonalShoppingList(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error {
+	tx, err := r.handleMessageIdempotently(ctx, messageId)
 	if err != nil {
 		if isUniqueViolationError(err) {
 			return nil
@@ -26,7 +27,7 @@ func (r *Repository) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid
 			VALUES ($1, $2)
 		`, shoppingListsTable)
 
-	if _, err = tx.Exec(createShoppingListQuery, shoppingListId, userId); err != nil {
+	if _, err = tx.ExecContext(ctx, createShoppingListQuery, shoppingListId, userId); err != nil {
 		log.Errorf("unable to create shopping list for user %s: %s", userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -36,7 +37,7 @@ func (r *Repository) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid
 			VALUES ($1, $2)
 		`, usersTable)
 
-	if _, err = tx.Exec(createConnectionQuery, shoppingListId, userId); err != nil {
+	if _, err = tx.ExecContext(ctx, createConnectionQuery, shoppingListId, userId); err != nil {
 		log.Errorf("unable to create connection between shopping list %s and user %s: %s", shoppingListId, userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -44,8 +45,8 @@ func (r *Repository) CreatePersonalShoppingList(userId uuid.UUID, messageId uuid
 	return commitTransaction(tx)
 }
 
-func (r *Repository) ImportFirebaseShoppingList(shoppingListId uuid.UUID, purchases []entity.Purchase, messageId uuid.UUID) error {
-	tx, err := r.handleMessageIdempotently(messageId)
+func (r *Repository) ImportFirebaseShoppingList(ctx context.Context, shoppingListId uuid.UUID, purchases []entity.Purchase, messageId uuid.UUID) error {
+	tx, err := r.handleMessageIdempotently(ctx, messageId)
 	if err != nil {
 		if isUniqueViolationError(err) {
 			return nil
@@ -59,7 +60,7 @@ func (r *Repository) ImportFirebaseShoppingList(shoppingListId uuid.UUID, purcha
 		return errorWithTransactionRollback(tx, err)
 	}
 
-	if _, err = tx.Exec(query, bsonShoppingList, shoppingListId); err != nil {
+	if _, err = tx.ExecContext(ctx, query, bsonShoppingList, shoppingListId); err != nil {
 		log.Errorf("unable to set shopping list %s: %s", shoppingListId, err)
 		return errorWithTransactionRollback(tx, shoppingListFail.GrpcShoppingListNotFound)
 	}
@@ -67,8 +68,8 @@ func (r *Repository) ImportFirebaseShoppingList(shoppingListId uuid.UUID, purcha
 	return commitTransaction(tx)
 }
 
-func (r *Repository) DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UUID) error {
-	tx, err := r.handleMessageIdempotently(messageId)
+func (r *Repository) DeleteUserShoppingLists(ctx context.Context, userId uuid.UUID, messageId uuid.UUID) error {
+	tx, err := r.handleMessageIdempotently(ctx, messageId)
 	if err != nil {
 		if isUniqueViolationError(err) {
 			return nil
@@ -82,7 +83,7 @@ func (r *Repository) DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UU
 			WHERE owner_id=$1
 		`, shoppingListsTable)
 
-	if _, err := tx.Exec(query, userId); err != nil {
+	if _, err := tx.ExecContext(ctx, query, userId); err != nil {
 		log.Errorf("unable to delete user %s: %s", userId, err)
 		return errorWithTransactionRollback(tx, fail.GrpcUnknown)
 	}
@@ -90,8 +91,8 @@ func (r *Repository) DeleteUserShoppingLists(userId uuid.UUID, messageId uuid.UU
 	return commitTransaction(tx)
 }
 
-func (r *Repository) handleMessageIdempotently(messageId uuid.UUID) (*sql.Tx, error) {
-	tx, err := r.startTransaction()
+func (r *Repository) handleMessageIdempotently(ctx context.Context, messageId uuid.UUID) (*sql.Tx, error) {
+	tx, err := r.startTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +102,7 @@ func (r *Repository) handleMessageIdempotently(messageId uuid.UUID) (*sql.Tx, er
 			VALUES ($1)
 		`, inboxTable)
 
-	if _, err = tx.Exec(addMessageQuery, messageId); err != nil {
+	if _, err = tx.ExecContext(ctx, addMessageQuery, messageId); err != nil {
 		if !isUniqueViolationError(err) {
 			log.Error("unable to add message to inbox: ", err)
 		}
@@ -119,7 +120,7 @@ func (r *Repository) handleMessageIdempotently(messageId uuid.UUID) (*sql.Tx, er
 			)
 		`, inboxTable)
 
-	if _, err = tx.Exec(deleteOutdatedMessagesQuery); err != nil {
+	if _, err = tx.ExecContext(ctx, deleteOutdatedMessagesQuery); err != nil {
 		return nil, errorWithTransactionRollback(tx, err)
 	}
 
