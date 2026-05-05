@@ -23,6 +23,7 @@ func (s *Service) GetShoppingListUsers(ctx context.Context, shoppingListId, requ
 	var users []entity.User
 	for _, id := range ids {
 		rawIds = append(rawIds, id.String())
+		users = append(users, entity.User{Id: id})
 	}
 
 	profiles := s.getProfilesInfo(ctx, rawIds)
