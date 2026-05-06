@@ -15,7 +15,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	log.Init("", false)
+	log.InitWithService("shopping-list", "", false)
 	os.Exit(m.Run())
 }
 
