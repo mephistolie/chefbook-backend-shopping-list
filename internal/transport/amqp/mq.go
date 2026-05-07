@@ -59,7 +59,11 @@ func (s *Server) Start() error {
 
 	go func() {
 		if err := s.consumerProfiles.Run(s.handleDelivery); err != nil {
-			log.Warnf("rabbitmq consumer stopped with error: %s", err)
+			log.LogWarnError(context.Background(), log.Event{
+				Event:     "mq.consumer.stopped",
+				Message:   "rabbitmq consumer stopped with error",
+				Component: log.ComponentAMQP,
+			}, err)
 		}
 	}()
 
@@ -69,12 +73,28 @@ func (s *Server) Start() error {
 func (s *Server) handleDelivery(delivery amqp.Delivery) amqp.Action {
 	messageId, err := uuid.Parse(delivery.MessageId)
 	if err != nil {
-		log.Warn("invalid message id: ", delivery.MessageId)
+		log.LogWarn(context.Background(), log.Event{
+			Event:     "mq.message.invalid_id",
+			Message:   "invalid message id",
+			Component: log.ComponentAMQP,
+			Payload: map[string]any{
+				"raw_message_id": delivery.MessageId,
+				"message_type":   delivery.Type,
+			},
+		})
 		return amqp.NackDiscard
 	}
 
 	if !slices.Contains(supportedMsgTypes, delivery.Type) {
-		log.Warn("unsupported message type: ", delivery.Type)
+		log.LogWarn(context.Background(), log.Event{
+			Event:     "mq.message.unsupported_type",
+			Message:   "unsupported message type",
+			Component: log.ComponentAMQP,
+			MessageID: messageId.String(),
+			Payload: map[string]any{
+				"message_type": delivery.Type,
+			},
+		})
 		return amqp.NackDiscard
 	}
 
@@ -84,7 +104,15 @@ func (s *Server) handleDelivery(delivery amqp.Delivery) amqp.Action {
 		Body: delivery.Body,
 	}
 	if err = s.handleMessage(msg); err != nil {
-		log.Warn("requeue message ", msg.Id)
+		log.LogWarnError(context.Background(), log.Event{
+			Event:     "mq.message.requeued",
+			Message:   "message requeued",
+			Component: log.ComponentAMQP,
+			MessageID: msg.Id.String(),
+			Payload: map[string]any{
+				"message_type": msg.Type,
+			},
+		}, err)
 		return amqp.NackRequeue
 	}
 
@@ -92,8 +120,16 @@ func (s *Server) handleDelivery(delivery amqp.Delivery) amqp.Action {
 }
 
 func (s *Server) handleMessage(msg MessageData) error {
-	log.Infof("processing message %s with type %s", msg.Id, msg.Type)
 	ctx := context.Background()
+	log.Log(ctx, log.Event{
+		Event:     "mq.message.processing",
+		Message:   "processing message",
+		Component: log.ComponentAMQP,
+		MessageID: msg.Id.String(),
+		Payload: map[string]any{
+			"message_type": msg.Type,
+		},
+	})
 	switch msg.Type {
 	case auth.MsgTypeProfileCreated:
 		return s.handleProfileCreatedMsg(ctx, msg.Id, msg.Body)
@@ -102,7 +138,15 @@ func (s *Server) handleMessage(msg MessageData) error {
 	case auth.MsgTypeProfileDeleted:
 		return s.handleProfileDeletedMsg(ctx, msg.Id, msg.Body)
 	default:
-		log.Warnf("got unsupported message type %s for message %s", msg.Type, msg.Id)
+		log.LogWarn(ctx, log.Event{
+			Event:     "mq.message.unsupported_type",
+			Message:   "got unsupported message type",
+			Component: log.ComponentAMQP,
+			MessageID: msg.Id.String(),
+			Payload: map[string]any{
+				"message_type": msg.Type,
+			},
+		})
 		return errors.New("not implemented")
 	}
 }

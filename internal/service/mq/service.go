@@ -31,17 +31,35 @@ func (s *Service) CreatePersonalShoppingList(ctx context.Context, userId uuid.UU
 
 func (s *Service) ImportFirebaseShoppingList(ctx context.Context, userId uuid.UUID, firebaseId string, messageId uuid.UUID) error {
 	if s.firebase == nil {
-		log.Warnf("try to import firebase profile with firebase import disabled")
+		log.LogWarn(ctx, log.Event{
+			Event:     "firebase.import.disabled",
+			Message:   "try to import firebase profile with firebase import disabled",
+			Component: log.ComponentFirebase,
+			UserID:    userId.String(),
+		})
 		return errors.New("firebase import disabled")
 	}
 
 	firebasePurchases, err := s.firebase.GetShoppingList(firebaseId)
 	if err != nil {
-		log.Warnf("unable to get firebase shopping list for user %s: %s", userId, err)
+		log.LogWarnError(ctx, log.Event{
+			Event:     "firebase.shopping_list.load_failed",
+			Message:   "unable to get firebase shopping list",
+			Component: log.ComponentFirebase,
+			UserID:    userId.String(),
+		}, err)
 		return err
 	}
 
-	log.Infof("found %d Firebase purchases for user %s...", len(*firebasePurchases), userId)
+	log.Log(ctx, log.Event{
+		Event:     "firebase.shopping_list.loaded",
+		Message:   "firebase shopping list loaded",
+		Component: log.ComponentFirebase,
+		UserID:    userId.String(),
+		Payload: map[string]any{
+			"purchases_count": len(*firebasePurchases),
+		},
+	})
 	var purchases []entity.Purchase
 	for _, firebasePurchase := range *firebasePurchases {
 		purchase := entity.Purchase{

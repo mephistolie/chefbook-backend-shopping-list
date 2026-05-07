@@ -13,7 +13,13 @@ func (s *Server) handleProfileCreatedMsg(ctx context.Context, messageId uuid.UUI
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
-	log.Infof("adding user %s...", body.UserId)
+	log.Log(ctx, log.Event{
+		Event:     "profile.created.message.processing",
+		Message:   "processing profile created message",
+		Component: log.ComponentAMQP,
+		MessageID: messageId.String(),
+		UserID:    body.UserId,
+	})
 
 	userId, err := uuid.Parse(body.UserId)
 	if err != nil {
@@ -34,7 +40,13 @@ func (s *Server) handleFirebaseImportMsg(ctx context.Context, messageId uuid.UUI
 		return err
 	}
 
-	log.Infof("import firebase profile %s for user %s...", body.FirebaseId, body.UserId)
+	log.Log(ctx, log.Event{
+		Event:     "profile.firebase_import.message.processing",
+		Message:   "processing firebase profile import message",
+		Component: log.ComponentAMQP,
+		MessageID: messageId.String(),
+		UserID:    body.UserId,
+	})
 	return s.service.ImportFirebaseShoppingList(ctx, userId, body.FirebaseId, messageId)
 }
 
@@ -49,6 +61,12 @@ func (s *Server) handleProfileDeletedMsg(ctx context.Context, messageId uuid.UUI
 		return err
 	}
 
-	log.Infof("deleting user %s...", body.UserId)
+	log.Log(ctx, log.Event{
+		Event:     "profile.deleted.message.processing",
+		Message:   "processing profile deleted message",
+		Component: log.ComponentAMQP,
+		MessageID: messageId.String(),
+		UserID:    body.UserId,
+	})
 	return s.service.DeleteUserShoppingLists(ctx, userId, messageId)
 }
